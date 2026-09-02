@@ -6,7 +6,10 @@ mit Kopfbereich (Logo/Kontoname/Datum) - lauffaehig unter Windows, ohne die
 Linux-Kommandozeilentools des Originals (ghostscript, paps, ImageMagick,
 qpdf, iconv, column, curl, perl-rename). Alles passiert direkt in Python.
 
-In StarMoney muss zur Nutzung dieses Tools vor dem Export eine CSV Spaltenkonfiguration unter Verwaltung/Datenexport angelegt werden. Dabei muessen die Spalten Buchungstag, Beguenstigter/Absender - Name, Betrag und Saldo ausgewaehlt werden.
+In StarMoney muss zur Nutzung dieses Tools vor dem Export eine CSV Spalten-
+konfiguration unter Verwaltung/Datenexport angelegt werden. Hierfuer muessen 
+die Spalten Buchungstag, Beguenstigter/Absender - Name, Betrag und Saldo 
+ausgewaehlt werden.
 
 ## Installation (einmalig)
 
