@@ -6,6 +6,10 @@ mit Kopfbereich (Logo/Kontoname/Datum) - lauffaehig unter Windows, ohne die
 Linux-Kommandozeilentools des Originals (ghostscript, paps, ImageMagick,
 qpdf, iconv, column, curl, perl-rename). Alles passiert direkt in Python.
 
+## Vorbereitung in StarMoney
+
+In Startmoney ist es notwendig unter Verwaltung/Datenexport/CSV-Spaltenkonfiguration ein Exporttemplate mit dem den Spalten "Buchungstag", "Begünstigter/Absender - Name", "Betrag" und "Saldo" anzulegen. Nur CSVs in diesem Format werden aktuell korrekt verarbeitet.
+
 ## Installation (einmalig)
 
 1. Python installieren: https://www.python.org/downloads/windows/
