@@ -8,7 +8,7 @@ qpdf, iconv, column, curl, perl-rename). Alles passiert direkt in Python.
 
 ## Vorbereitung in StarMoney
 
-In Startmoney ist es notwendig unter Verwaltung/Datenexport/CSV-Spaltenkonfiguration ein Exporttemplate mit dem den Spalten "Buchungstag", "Begünstigter/Absender - Name", "Betrag" und "Saldo" anzulegen. Nur CSVs in diesem Format werden aktuell korrekt verarbeitet.
+In Starmoney ist es notwendig, unter Verwaltung/Datenexport/CSV-Spaltenkonfiguration ein Exporttemplate mit den Spalten "Buchungstag", "Begünstigter/Absender - Name", "Betrag" und "Saldo" anzulegen. Nur CSVs in diesem Format werden aktuell korrekt verarbeitet.
 
 ## Installation (einmalig)
 
