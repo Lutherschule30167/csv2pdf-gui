@@ -402,3 +402,8 @@ footer.site-footer {
   section { padding: 54px 0; }
   .repo-callout { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- Installation (EXE-Anleitung) ---------- */
+.install-steps { max-width: 760px; margin-bottom: 28px; }
+.install-steps .btn { margin-top: 6px; }
+.download-more { margin-top: 22px; font-size: 0.92rem; color: var(--ink-soft); }
