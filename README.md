@@ -225,7 +225,7 @@ jedem veroeffentlichten Release automatisch per GitHub Actions gebaut
 (Workflow `.github/workflows/build-windows-exe.yml`) und unten am Release
 unter **Assets** angehaengt:
 
-- `StarMoney-Kontoauszuege.exe` - die grafische Oberflaeche (Doppelklick)
+- `csv2pdf-gui.exe` - die grafische Oberflaeche (Doppelklick)
 - `starmoney_export.exe` - die Kommandozeilenversion (gleiche Optionen wie
   `python starmoney_export.py`)
 

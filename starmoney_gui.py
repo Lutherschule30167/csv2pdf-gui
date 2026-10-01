@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-StarMoney-Kontoauszuege -- einfache GUI fuer Endbenutzer
+csv2pdf-gui -- einfache GUI fuer Endbenutzer
 =========================================================
 
 Grafische Oberflaeche fuer starmoney_export.py. Muss im selben Ordner wie
@@ -88,7 +88,7 @@ def open_folder(path):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"StarMoney-Kontoauszuege erstellen (Version {backend.__version__})")
+        self.title(f"csv2pdf-gui erstellen (Version {backend.__version__})")
         self.geometry("760x600")
         self.minsize(640, 480)
 

@@ -3,10 +3,10 @@ REM Baut die Windows-EXEs lokal (dieselben Befehle wie der GitHub-Workflow
 REM .github\workflows\build-windows-exe.yml). Ergebnis liegt in dist\.
 cd /d "%~dp0"
 python -m pip install -r requirements.txt pyinstaller Pillow || goto :fehler
-python -m PyInstaller --noconfirm --clean --onefile --windowed --name StarMoney-Kontoauszuege starmoney_gui.py || goto :fehler
+python -m PyInstaller --noconfirm --clean --onefile --windowed --name csv2pdf-gui starmoney_gui.py || goto :fehler
 python -m PyInstaller --noconfirm --clean --onefile --console --name starmoney_export starmoney_export.py || goto :fehler
 echo.
-echo Fertig: dist\StarMoney-Kontoauszuege.exe und dist\starmoney_export.exe
+echo Fertig: dist\csv2pdf-gui.exe und dist\starmoney_export.exe
 pause
 exit /b 0
 :fehler
