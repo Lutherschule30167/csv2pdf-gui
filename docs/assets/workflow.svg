@@ -27,7 +27,7 @@
     </g>
     <text x="90" y="140" text-anchor="middle" font-family="Consolas, 'SFMono-Regular', monospace" font-size="12.5" fill="#FBFAF6">csv2pdf-gui</text>
   </g>
-  <text x="450" y="234" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#4B5563">Verarbeitung (Python)</text>
+  <text x="450" y="234" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#4B5563">Verarbeitung</text>
 
   <!-- Node 3: PDF -->
   <g transform="translate(680,60)">

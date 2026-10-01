@@ -407,3 +407,5 @@ footer.site-footer {
 .install-steps { max-width: 760px; margin-bottom: 28px; }
 .install-steps .btn { margin-top: 6px; }
 .download-more { margin-top: 22px; font-size: 0.92rem; color: var(--ink-soft); }
+.konto-hinweis { max-width: 760px; margin-top: 28px; }
+.konto-hinweis strong { display: block; margin-bottom: 6px; color: var(--ink); }

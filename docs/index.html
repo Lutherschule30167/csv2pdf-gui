@@ -79,8 +79,8 @@
 
   <!-- PROBLEM / INTRO -->
   <section id="ueber">
-    <div class="wrap intro-grid">
-      <div class="intro-copy">
+    <div class="wrap">
+      <div class="intro-copy intro-grid">
         <div class="section-head">
           <h2>Vom Rohexport zum vorzeigbaren Beleg</h2>
         </div>
@@ -162,6 +162,10 @@
           <h3>Fertige PDFs abholen</h3>
           <p>Die PDFs liegen im selben Ordner, benannt nach Kontoname und Datum. „Ordner oeffnen“ zeigt sie direkt an.</p>
         </div>
+      </div>
+      <div class="note konto-hinweis">
+        <strong>Woher kommt der Kontoname auf dem Auszug?</strong>
+        csv2pdf-gui übernimmt ihn aus dem Kontonamen, den StarMoney beim Export in den Dateinamen schreibt, und zwar alles bis zum ersten Unterstrich (_). Aus einem Export „Klassenkasse 5b_…“ wird so „Klassenkasse 5b“. Benennen Sie Ihre Unterkonten in StarMoney deshalb so, wie sie auf dem Auszug stehen sollen, und verwenden Sie im Namen selbst keinen Unterstrich.
       </div>
     </div>
   </section>
