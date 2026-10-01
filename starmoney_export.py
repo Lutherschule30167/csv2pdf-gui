@@ -50,6 +50,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
+# Zentrale Versionsnummer (wird auch von starmoney_gui.py angezeigt).
+# Bei Aenderung README, /docs und Wiki angleichen.
+__version__ = "0.2"
+
 # ---------------------------------------------------------------------------
 # Konfiguration
 # ---------------------------------------------------------------------------
@@ -807,6 +811,7 @@ def parse_args():
     p = argparse.ArgumentParser(
         description="StarMoney-CSV-Exporte zu PDF-Kontoauszuegen verarbeiten "
                      "(Windows-Portierung des Original-Bash-Skripts).")
+    p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     p.add_argument("verzeichnis", nargs="?", default=None,
                     help="Exportverzeichnis (Standard: 'export_auszuege' neben diesem Skript)")
     p.add_argument("--delete-csv", action="store_true",
