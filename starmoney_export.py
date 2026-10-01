@@ -151,8 +151,17 @@ DEFAULT_CONFIG = {
 }
 
 
+def app_dir():
+    """Ordner, in dem config.json und export_auszuege liegen: neben dem
+    Skript, bzw. bei der mit PyInstaller gebauten .exe neben der .exe
+    (__file__ zeigt dort in einen temporaeren Entpackordner)."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(os.path.abspath(sys.executable))
+    return os.path.dirname(os.path.abspath(__file__))
+
+
 def config_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+    return os.path.join(app_dir(), "config.json")
 
 
 def load_config():
@@ -887,8 +896,7 @@ def watch_loop(export_dir, interval_seconds, run_export_kwargs, log=None, log_er
 
 def main():
     args = parse_args()
-    export_dir = args.verzeichnis or os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "export_auszuege")
+    export_dir = args.verzeichnis or os.path.join(app_dir(), "export_auszuege")
 
     if args.save_config:
         updates = {}

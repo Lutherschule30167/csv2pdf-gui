@@ -14,6 +14,9 @@ In Starmoney ist es notwendig, unter Verwaltung/Datenexport/CSV-Spaltenkonfigura
 
 ## Installation (einmalig)
 
+Ohne Python geht es auch: siehe **Eigenstaendige .exe** weiter unten.
+Fuer den Weg mit Python:
+
 1. Python installieren: https://www.python.org/downloads/windows/
    Beim Installer unbedingt **"Add python.exe to PATH"** ankreuzen.
 2. Abhaengigkeit installieren (Eingabeaufforderung / PowerShell):
@@ -215,24 +218,28 @@ StarMoney-Exporte nicht. Am besten einmal mit einer echten (ggf.
 anonymisierten) Beispiel-CSV gegenchecken, ob die Spaltenbreiten so
 passen, wie ihr sie gewohnt seid.
 
-## Eigenstaendige .exe (optional)
+## Eigenstaendige .exe (ohne Python)
 
-Falls kein Python auf den Zielrechnern installiert werden soll, laesst
-sich daraus mit PyInstaller eine eigenstaendige .exe bauen - das muss
-allerdings auf einem Windows-Rechner passieren (PyInstaller kompiliert
-nicht plattformuebergreifend):
+Fuer Rechner ohne Python gibt es fertige Windows-EXEs. Sie werden bei
+jedem veroeffentlichten Release automatisch per GitHub Actions gebaut
+(Workflow `.github/workflows/build-windows-exe.yml`) und unten am Release
+unter **Assets** angehaengt:
 
-```
-pip install pyinstaller
-pyinstaller --onefile starmoney_export.py
-```
+- `csv2pdf-gui.exe` - die grafische Oberflaeche (Doppelklick)
+- `csv2pdf.exe` - die Kommandozeilenversion (gleiche Optionen wie
+  `python starmoney_export.py`)
 
-Die fertige .exe liegt danach in `dist\starmoney_export.exe`.
+Die EXE einfach in einen eigenen Ordner legen. `config.json` und der
+Standardordner `export_auszuege` liegen dann neben der .exe. Beim ersten
+Start warnt Windows SmartScreen eventuell ("Unbekannter Herausgeber"), da
+die EXE nicht signiert ist: **Weitere Informationen -> Trotzdem
+ausfuehren**.
 
-Fuer die GUI analog:
-```
-pyinstaller --onefile --windowed --add-data "starmoney_export.py;." starmoney_gui.py
-```
-(`--windowed` unterdrueckt das Konsolenfenster; `--add-data` bettet
-`starmoney_export.py` mit ein, falls PyInstaller es nicht automatisch
-findet - im Zweifel beide .py-Dateien einfach im selben Ordner lassen.)
+Der Build laesst sich auch ohne Release starten: auf GitHub unter
+**Actions -> Windows-EXE bauen -> Run workflow**. Die EXEs liegen dann
+als Artefakt zum Download auf der Seite des Laufs.
+
+Lokal auf einem Windows-Rechner mit Python geht es per Doppelklick auf
+`build_exe.bat`; das Ergebnis liegt danach in `dist\`. (PyInstaller
+kompiliert nicht plattformuebergreifend, unter macOS/Linux entsteht also
+keine Windows-EXE.)
