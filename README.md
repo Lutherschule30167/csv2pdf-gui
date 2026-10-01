@@ -226,7 +226,7 @@ jedem veroeffentlichten Release automatisch per GitHub Actions gebaut
 unter **Assets** angehaengt:
 
 - `csv2pdf-gui.exe` - die grafische Oberflaeche (Doppelklick)
-- `starmoney_export.exe` - die Kommandozeilenversion (gleiche Optionen wie
+- `csv2pdf.exe` - die Kommandozeilenversion (gleiche Optionen wie
   `python starmoney_export.py`)
 
 Die EXE einfach in einen eigenen Ordner legen. `config.json` und der
