@@ -1,0 +1,48 @@
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="flowTitle">
+  <title id="flowTitle">Ablauf: StarMoney-Export, Verarbeitung durch csv2pdf-gui, fertiger Kontoauszug</title>
+
+  <!-- connecting line -->
+  <line x1="150" y1="130" x2="750" y2="130" stroke="#C9BFA1" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round"/>
+
+  <!-- Node 1: CSV export -->
+  <g transform="translate(40,60)">
+    <rect x="0" y="0" width="180" height="140" fill="#FBFAF6" stroke="#1C2333" stroke-width="1.5"/>
+    <g transform="translate(60,26)">
+      <path d="M0 0 L44 0 L44 60 L0 60 Z" fill="none" stroke="#8C3B34" stroke-width="2"/>
+      <path d="M12 0 L12 -14 L34 -14" fill="none" stroke="#8C3B34" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="8" y1="20" x2="36" y2="20" stroke="#8C3B34" stroke-width="1.6"/>
+      <line x1="8" y1="30" x2="36" y2="30" stroke="#8C3B34" stroke-width="1.6"/>
+      <line x1="8" y1="40" x2="28" y2="40" stroke="#8C3B34" stroke-width="1.6"/>
+    </g>
+    <text x="90" y="115" text-anchor="middle" font-family="Consolas, 'SFMono-Regular', monospace" font-size="13" fill="#1C2333">.csv</text>
+  </g>
+  <text x="130" y="234" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#4B5563">StarMoney-Export</text>
+
+  <!-- Node 2: tool -->
+  <g transform="translate(360,45)">
+    <rect x="0" y="0" width="180" height="170" fill="#1C2333"/>
+    <g transform="translate(58,44)" stroke="#FBFAF6" stroke-width="2" fill="none">
+      <circle cx="32" cy="32" r="14"/>
+      <path d="M32 4 v10 M32 50 v10 M4 32 h10 M50 32 h10 M11 11 l7 7 M46 46 l7 7 M53 11 l-7 7 M18 46 l-7 7"/>
+    </g>
+    <text x="90" y="140" text-anchor="middle" font-family="Consolas, 'SFMono-Regular', monospace" font-size="12.5" fill="#FBFAF6">csv2pdf-gui</text>
+  </g>
+  <text x="450" y="234" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#4B5563">Verarbeitung (Python)</text>
+
+  <!-- Node 3: PDF -->
+  <g transform="translate(680,60)">
+    <rect x="0" y="0" width="180" height="140" fill="#FBFAF6" stroke="#1C2333" stroke-width="1.5"/>
+    <g transform="translate(64,24)">
+      <rect x="0" y="0" width="52" height="64" fill="none" stroke="#2F5D45" stroke-width="2"/>
+      <line x1="10" y1="16" x2="42" y2="16" stroke="#2F5D45" stroke-width="1.6"/>
+      <line x1="10" y1="26" x2="42" y2="26" stroke="#2F5D45" stroke-width="1.6"/>
+      <line x1="10" y1="36" x2="30" y2="36" stroke="#2F5D45" stroke-width="1.6"/>
+    </g>
+    <text x="90" y="115" text-anchor="middle" font-family="Consolas, 'SFMono-Regular', monospace" font-size="13" fill="#1C2333">.pdf</text>
+  </g>
+  <text x="770" y="234" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#4B5563">Kontoauszug</text>
+
+  <!-- arrowheads on the dashed line -->
+  <path d="M290,124 l14,6 l-14,6" fill="none" stroke="#8C3B34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M600,124 l14,6 l-14,6" fill="none" stroke="#2F5D45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

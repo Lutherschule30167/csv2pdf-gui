@@ -1,0 +1,22 @@
+<svg viewBox="0 0 460 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="imprintTitle">
+  <title id="imprintTitle">Impressum: Oliver Held, Danziger Str. 2, 31675 Bückeburg, E-Mail info at bolwerk Punkt de</title>
+  <rect x="1" y="1" width="458" height="188" fill="#FBFAF6" stroke="#1C2333" stroke-width="1.5"/>
+
+  <!-- small stamp mark, top-right corner -->
+  <g transform="translate(392,20)" opacity="0.9">
+    <circle cx="24" cy="24" r="22" fill="none" stroke="#8C3B34" stroke-width="1.4"/>
+    <path d="M14 24 L21 31 L35 15" fill="none" stroke="#8C3B34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g font-family="Consolas, 'SFMono-Regular', monospace" fill="#1C2333">
+    <text x="32" y="46" font-size="17" font-weight="600">Oliver Held</text>
+    <text x="32" y="76" font-size="14.5" fill="#4B5563">Danziger Stra&#223;e 2</text>
+    <text x="32" y="98" font-size="14.5" fill="#4B5563">31675 B&#252;ckeburg</text>
+
+    <line x1="32" y1="118" x2="330" y2="118" stroke="#D8D2BF" stroke-width="1"/>
+
+    <text x="32" y="144" font-size="14.5"><tspan fill="#2F5D45">info</tspan><tspan fill="#4B5563"> [at] </tspan><tspan fill="#2F5D45">bolwerk</tspan><tspan fill="#4B5563"> [punkt] </tspan><tspan fill="#2F5D45">de</tspan></text>
+
+    <text x="32" y="172" font-size="11" fill="#8a8060">Angaben gem&#228;&#223; &#167; 5 TMG</text>
+  </g>
+</svg>

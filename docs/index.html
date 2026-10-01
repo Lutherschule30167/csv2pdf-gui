@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>csv2pdf-gui — StarMoney-Kontoauszüge als lesbares PDF</title>
+<meta name="description" content="csv2pdf-gui verwandelt StarMoney-CSV-Exporte in formatierte PDF-Kontoauszüge mit Kopfbereich, Logo und Datum — für Windows, macOS und Linux.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"></span>csv2pdf-gui</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">☰</button>
+    <nav class="primary-nav" id="primaryNav">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#ablauf">Ablauf</a>
+      <a href="#installation">Installation</a>
+      <a href="#konfiguration">Konfiguration</a>
+      <a href="#downloads">Downloads</a>
+    </nav>
+    <div class="header-ctas">
+      <a class="btn btn-primary" href="#downloads">Downloads</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>Kontoauszüge, die sich tatsächlich lesen lassen.</h1>
+        <p class="lede">csv2pdf-gui macht aus StarMoney-CSV-Exporten formatierte PDF-Kontoauszüge mit Kopfbereich, Logo und Datum — ohne Ghostscript, ohne ImageMagick, ohne Linux-Kommandozeile. Nur Python, unter Windows, macOS und Linux.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#installation">Installation ansehen</a>
+          <a class="btn btn-ghost" href="#downloads">Dateien herunterladen</a>
+        </div>
+        <p class="meta-line">Version 0.2 · 100&nbsp;% KI programmiert für die Lutherschule Hannover · einzige Abhängigkeit: <code>reportlab</code></p>
+      </div>
+      <div class="hero-art">
+        <img src="assets/hero-statement.svg" alt="Eine rohe StarMoney-CSV-Datei wird in einen formatierten PDF-Kontoauszug mit Kopfbereich, Buchungstabelle und Fußzeile mit Links umgewandelt.">
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM / INTRO -->
+  <section class="section-alt" id="ueber">
+    <div class="wrap intro-grid">
+      <div class="intro-copy">
+        <div class="section-head">
+          <h2>Vom Rohexport zum vorzeigbaren Beleg</h2>
+        </div>
+        <p>StarMoney exportiert Kontobewegungen als schmucklose CSV-Tabelle — praktisch für die Weiterverarbeitung, aber nichts, das man einem Vorstand, einem Kollegium oder einem Fördermitglied in die Hand drücken möchte.</p>
+        <p>csv2pdf-gui übernimmt genau diesen letzten Schritt: Es gruppiert Buchungen nach Tag, sortiert Gutschriften vor Abbuchungen, setzt alles in einer sauberen Monospace-Tabelle und legt einen Kopfbereich mit Schullogo, Kontoname und Datum darüber. Das Original-Bash-Skript der Lutherschule Hannover brauchte dafür sechs externe Linux-Werkzeuge. Diese Neuimplementierung braucht keines davon.</p>
+        <p class="pillquote">„Alles passiert direkt in Python — lauffähig unter Windows, ohne die Linux-Kommandozeilentools des Originals.“</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="funktionen">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Was das Tool übernimmt</h2>
+        <p>Sechs Punkte, die den Unterschied zwischen einer Rohdatei und einem fertigen Beleg ausmachen.</p>
+      </div>
+      <div class="feature-grid">
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="6" width="24" height="20"/><circle cx="12" cy="13" r="2.4"/><path d="M4 22 L12 15 L18 20 L22 16 L28 22"/></svg>
+          <h3>Logo frei wählbar</h3>
+          <p>PNG, JPG, GIF oder BMP — wird automatisch auf 78×60&nbsp;pt skaliert, Seitenverhältnis bleibt erhalten. Kein Logo? Dann bleibt der Kopf einfach leer.</p>
+        </div>
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 24 L13 8 L20 24"/><path d="M8.5 18 h9"/><path d="M21 24 L21 12 C21 10 23 9 25 10 C27 11 27 14 25 15 L21 17"/></svg>
+          <h3>Kopf-Schriftart einstellbar</h3>
+          <p>Helvetica, Times-Roman oder Courier ohne Zusatzdatei — oder eine eigene .ttf/.otf. Die Buchungstabelle bleibt bewusst immer Courier.</p>
+        </div>
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="12" height="10" rx="5"/><rect x="16" y="11" width="12" height="10" rx="5"/><line x1="13" y1="16" x2="19" y2="16"/></svg>
+          <h3>Links im Fußbereich</h3>
+          <p>Schulordnung, Kontakt, Datenschutzerklärung — beliebig viele klickbare Links, verankert auf der letzten Seite jedes Kontoauszugs.</p>
+        </div>
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="16" cy="16" r="11"/><circle cx="16" cy="16" r="3.4"/><path d="M16 3 v4 M16 25 v4 M3 16 h4 M25 16 h4"/></svg>
+          <h3>Ordner automatisch überwachen</h3>
+          <p>Prüft den Exportordner in einstellbarem Intervall und verarbeitet nur neu hinzugekommene CSV-Dateien — bereits erledigte bleiben unangetastet.</p>
+        </div>
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 4 L27 8 V16 C27 22 22 26 16 28 C10 26 5 22 5 16 V8 Z"/><path d="M11 16 L15 20 L22 12"/></svg>
+          <h3>CSV-Originale bleiben erhalten</h3>
+          <p>Der sicherere Standard dieser Portierung: Quelldateien werden nur auf ausdrücklichen Wunsch gelöscht, nicht automatisch.</p>
+        </div>
+
+        <div class="feature">
+          <svg class="ficon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="6" width="9" height="7"/><rect x="15" y="6" width="9" height="7"/><rect x="9.5" y="17" width="9" height="7"/><line x1="8.5" y1="13" x2="8.5" y2="17" opacity="0"/></svg>
+          <h3>Windows, macOS und Linux</h3>
+          <p>Reines Python mit nur einer Abhängigkeit (<code class="mono">reportlab</code>). Keine plattformspezifischen Zusatzwerkzeuge nötig.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKFLOW -->
+  <section class="section-alt" id="ablauf">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Ablauf in drei Schritten</h2>
+        <p>Vom Export in StarMoney bis zum fertigen Beleg im Ordner.</p>
+      </div>
+      <div class="workflow-art">
+        <img src="assets/workflow.svg" alt="StarMoney-CSV-Export fließt in csv2pdf-gui und wird dort zu einem fertigen PDF-Kontoauszug verarbeitet.">
+      </div>
+      <div class="steps" style="margin:36px auto 0;">
+        <div class="step">
+          <h3>StarMoney exportieren</h3>
+          <p>Unter Verwaltung → Datenexport → CSV-Spaltenkonfiguration ein Exporttemplate mit den Spalten „Buchungstag“, „Begünstigter/Absender – Name“, „Betrag“ und „Saldo“ anlegen. Nur CSVs in diesem Format werden aktuell korrekt verarbeitet.</p>
+        </div>
+        <div class="step">
+          <h3>Ordner auswählen und Regler setzen</h3>
+          <p>In der grafischen Oberfläche den Export-Ordner wählen, bei Bedarf Logo und Kopf-Schriftart einstellen, dann auf „Kontoauszüge erstellen“ klicken.</p>
+        </div>
+        <div class="step">
+          <h3>Fertige PDFs abholen</h3>
+          <p>Jede Datei landet als <code class="mono">&lt;Konto&gt;_&lt;Datum&gt;.pdf</code> im selben Verzeichnis. „Ordner öffnen“ zeigt sie direkt im Explorer bzw. Finder.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALLATION -->
+  <section id="installation">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Installation</h2>
+        <p>Drei Wege, je nach Betriebssystem — überall dieselbe Logik, nur eine Abhängigkeit.</p>
+      </div>
+
+      <div class="tabs">
+        <div class="tab-list" role="tablist" aria-label="Installationsanleitung nach Betriebssystem">
+          <button class="tab" role="tab" aria-selected="true" aria-controls="panel-win" id="tab-win">Windows</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="panel-mac" id="tab-mac">macOS</button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="panel-cli" id="tab-cli">Kommandozeile</button>
+        </div>
+
+        <div class="tab-panel active" id="panel-win" role="tabpanel" aria-labelledby="tab-win">
+          <ol>
+            <li><strong>Python installieren</strong> von python.org/downloads/windows. Im Installer unbedingt „Add python.exe to PATH“ ankreuzen.</li>
+            <li><strong>Abhängigkeit installieren</strong> in Eingabeaufforderung oder PowerShell:
+              <pre class="code">pip install -r requirements.txt<br><span class="c"># einzige Abhängigkeit: reportlab</span></pre>
+            </li>
+            <li><strong>Pillow optional</strong> nachinstallieren, falls die GUI-Logovorschau auch JPG/BMP anzeigen soll: <code class="mono">pip install Pillow</code>. PNG/GIF funktioniert auch ohne, die PDF-Erzeugung selbst ebenfalls.</li>
+            <li><strong>Starten</strong> per Doppelklick auf <code class="mono">start_gui.bat</code> — öffnet die grafische Oberfläche direkt.</li>
+          </ol>
+          <div class="note">Benötigt <code class="mono">tkinter</code>. Das ist im offiziellen Windows-Installer von python.org standardmäßig dabei — bei einer benutzerdefinierten Installation „tcl/tk and IDLE“ angehakt lassen.</div>
+        </div>
+
+        <div class="tab-panel" id="panel-mac" role="tabpanel" aria-labelledby="tab-mac">
+          <ol>
+            <li><strong>Python installieren</strong>, falls nicht vorhanden — von python.org/downloads/macos oder per Homebrew (<code class="mono">brew install python</code>). macOS bringt oft eine alte Python-2-Version mit: <code class="mono">python3</code>/<code class="mono">pip3</code> verwenden.</li>
+            <li><strong>Abhängigkeit installieren</strong> im entpackten Ordner:
+              <pre class="code">pip3 install -r requirements.txt</pre>
+            </li>
+            <li><strong>Starten</strong>:
+              <pre class="code">python3 starmoney_export.py    <span class="c"># Kommandozeile</span><br>python3 starmoney_gui.py       <span class="c"># grafische Oberfläche</span></pre>
+              Alternativ liegen <code class="mono">start_gui_mac.command</code> und <code class="mono">start_export_mac.command</code> bei — vor dem ersten Doppelklick einmalig ausführbar machen:
+              <pre class="code">chmod +x start_gui_mac.command start_export_mac.command</pre>
+            </li>
+            <li><strong>Gatekeeper-Warnung?</strong> Da die Dateien aus dem Internet stammen, blockiert macOS den ersten Start eventuell. Im Finder mit Rechtsklick → „Öffnen“ starten statt per Doppelklick — nur beim ersten Mal nötig.</li>
+          </ol>
+          <div class="note">Bei Problemen mit Rechten, fehlendem <code class="mono">tkinter</code> oder einer „externally-managed-environment“-Meldung: die Datei <code class="mono">TROUBLESHOOTING_MACOS.md</code> enthält die in der Praxis aufgetretenen Fehler im Wortlaut samt Lösung.</div>
+        </div>
+
+        <div class="tab-panel" id="panel-cli" role="tabpanel" aria-labelledby="tab-cli">
+          <p style="color:var(--ink-soft);margin-top:0;">Für den Einsatz ohne Fenster — etwa als geplante Aufgabe oder Hintergrundprozess.</p>
+          <pre class="code">python starmoney_export.py [Exportverzeichnis] [--delete-csv] [--watch [SEKUNDEN]]</pre>
+          <ol>
+            <li>Ohne Pfadangabe wird der Ordner <code class="mono">export_auszuege</code> neben dem Skript verwendet.</li>
+            <li><code class="mono">--delete-csv</code> löscht die Original-CSVs nach erfolgreicher Verarbeitung. Ohne dieses Flag bleiben sie erhalten — der sicherere Standard dieser Portierung.</li>
+            <li><code class="mono">--watch [SEKUNDEN]</code> lässt das Skript dauerhaft laufen (Standard 30&nbsp;s) und verarbeitet automatisch nur neue Dateien:
+              <pre class="code">python starmoney_export.py --watch 60</pre>
+            </li>
+            <li>Alternativ Doppelklick auf <code class="mono">start_export.bat</code> — ein einmaliger Lauf ohne <code class="mono">--watch</code>, ohne GUI.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONFIGURATION -->
+  <section class="section-alt" id="konfiguration">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Logo, Schrift und Links konfigurieren</h2>
+        <p>Kein festes Schullogo mehr im Code — alles liegt in einer einfachen <code class="mono">config.json</code> neben dem Skript.</p>
+      </div>
+      <div class="config-grid">
+        <div>
+          <h3 style="font-size:1.05rem;">Über die Kommandozeile</h3>
+          <pre class="code">python starmoney_export.py --logo "C:\Pfad\logo.png" \<br>  --header-font Times-Roman --save-config</pre>
+          <pre class="code">python starmoney_export.py --logo "" \<br>  --header-font-file "C:\Pfad\Schrift.ttf" --save-config</pre>
+          <p style="color:var(--ink-soft);font-size:0.92rem;"><code class="mono">--save-config</code> schreibt die Werte dauerhaft in <code class="mono">config.json</code>. Ohne dieses Flag gilt die Angabe nur für den einen Aufruf. In der GUI liegen dieselben Felder unter Optionen → Einstellungen und speichern automatisch bei jeder Änderung.</p>
+        </div>
+        <div>
+          <h3 style="font-size:1.05rem;">Links im Fußbereich (footer_links)</h3>
+          <pre class="code">"footer_links": [<br>  {"name": "Schulordnung",<br>   "url": "https://schule.example/ordnung.pdf"},<br>  {"name": "Kontakt",<br>   "url": "https://schule.example/kontakt"}<br>]</pre>
+          <p style="color:var(--ink-soft);font-size:0.92rem;">Der Name erscheint sichtbar als Linktext, die URL nur als Klickziel dahinter. Sind weder Logo noch Links konfiguriert, erscheint gar kein Fußbereich.</p>
+        </div>
+      </div>
+      <div class="note" style="margin-top:8px;">Ohne Python? Unter <a href="#downloads">Downloads</a> gibt es <code class="mono">csv2pdf-gui.exe</code> und <code class="mono">csv2pdf.exe</code> als fertige Windows-Programme. <code class="mono">config.json</code> liegt dann neben der .exe.</div>
+    </div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section id="downloads">
+    <div class="wrap">
+      <div class="section-head download-lead">
+        <h2>Downloads</h2>
+        <p>Fertige Windows-Programme ohne Python, alle Projektdateien einzeln oder der komplette Quellcode als ein Archiv. Aktuelle Version: 0.2.</p>
+      </div>
+
+      <div class="download-grid">
+        <a class="dl-card" href="https://github.com/Lutherschule30167/csv2pdf-gui/releases/latest/download/csv2pdf-gui.exe">
+          <span class="dl-name">csv2pdf-gui.exe</span>
+          <span class="dl-desc">Grafische Oberfläche als eigenständiges Windows-Programm, ohne Python. Doppelklick genügt.</span>
+          <span class="dl-tag">Windows-EXE</span>
+        </a>
+        <a class="dl-card" href="https://github.com/Lutherschule30167/csv2pdf-gui/releases/latest/download/csv2pdf.exe">
+          <span class="dl-name">csv2pdf.exe</span>
+          <span class="dl-desc">Kommandozeilenversion als Windows-Programm, gleiche Optionen wie starmoney_export.py.</span>
+          <span class="dl-tag">Windows-EXE</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/starmoney_gui.py" download>
+          <span class="dl-name">starmoney_gui.py</span>
+          <span class="dl-desc">Grafische Oberfläche für Endbenutzer — braucht starmoney_export.py im selben Ordner.</span>
+          <span class="dl-tag">Python</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/starmoney_export.py" download>
+          <span class="dl-name">starmoney_export.py</span>
+          <span class="dl-desc">Kernlogik und Kommandozeilen-Werkzeug — kann auch eigenständig laufen.</span>
+          <span class="dl-tag">Python</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/requirements.txt" download>
+          <span class="dl-name">requirements.txt</span>
+          <span class="dl-desc">Abhängigkeitsliste für pip — aktuell nur reportlab.</span>
+          <span class="dl-tag">Text</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/start_gui.bat" download>
+          <span class="dl-name">start_gui.bat</span>
+          <span class="dl-desc">Windows-Starter für die grafische Oberfläche, ein Doppelklick genügt.</span>
+          <span class="dl-tag">Windows</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/start_export.bat" download>
+          <span class="dl-name">start_export.bat</span>
+          <span class="dl-desc">Windows-Starter für einen einmaligen Lauf ohne Fenster.</span>
+          <span class="dl-tag">Windows</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/start_gui_mac.command" download>
+          <span class="dl-name">start_gui_mac.command</span>
+          <span class="dl-desc">macOS-Starter für die grafische Oberfläche — vor dem ersten Mal ausführbar machen.</span>
+          <span class="dl-tag">macOS</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/start_export_mac.command" download>
+          <span class="dl-name">start_export_mac.command</span>
+          <span class="dl-desc">macOS-Starter für einen einmaligen Lauf ohne Fenster.</span>
+          <span class="dl-tag">macOS</span>
+        </a>
+        <a class="dl-card" href="https://raw.githubusercontent.com/Lutherschule30167/csv2pdf-gui/main/TROUBLESHOOTING_MACOS.md" download>
+          <span class="dl-name">TROUBLESHOOTING_MACOS.md</span>
+          <span class="dl-desc">Fehlermeldungen aus der Praxis samt Lösung, im Wortlaut.</span>
+          <span class="dl-tag">Doku</span>
+        </a>
+      </div>
+
+      <div class="repo-callout">
+        <div>
+          <h3>Kompletter Quellcode</h3>
+          <p>Alle Dateien zusammen als ZIP, direkt von GitHub — oder das Repository selbst ansehen.</p>
+        </div>
+        <div class="cta-row" style="margin:0;">
+          <a class="btn btn-primary" style="border-color:var(--card-bg);" href="https://github.com/Lutherschule30167/csv2pdf-gui/archive/refs/heads/main.zip">Quellcode (ZIP)</a>
+          <a class="btn btn-ghost" style="border-color:var(--card-bg);color:var(--card-bg);" href="https://github.com/Lutherschule30167/csv2pdf-gui">Zum Repository</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECHTLICHES -->
+  <section class="section-alt" id="rechtliches">
+    <div class="wrap" style="max-width:760px;">
+      <div class="section-head">
+        <h2>Rechtliches</h2>
+      </div>
+
+      <div class="legal-block">
+        <h3>Haftungsausschluss</h3>
+        <p>Dieses Werkzeug wird kostenlos und ohne Gewähr zur Verfügung gestellt. Die Nutzung erfolgt auf eigene Gefahr. csv2pdf-gui steht in keinem Zusammenhang mit der Lutherschule Hannover und ist keine offizielle Software der Schule. Es wurde von der technischen Schulassistenz eigenständig per KI-Prompting erstellt, um die tägliche Arbeit zu erleichtern.</p>
+      </div>
+
+      <div class="legal-block">
+        <h3>Markenhinweis</h3>
+        <p>„StarMoney“ ist eine eingetragene Wortmarke der Star Finanz-Software Entwicklung und Vertriebs GmbH, Hamburg. Die Nennung auf dieser Seite dient ausschließlich der Beschreibung der Kompatibilität mit dem Exportformat dieser Software und erfolgt zu rein informellen Zwecken. Es besteht keine Verbindung, Kooperation oder Beauftragung durch den Markeninhaber.</p>
+      </div>
+
+      <div class="legal-block">
+        <h3>Datenschutz &amp; Cookies</h3>
+        <p>Diese Website setzt keine Cookies, kein Tracking und keine Analysewerkzeuge ein. Es werden keine personenbezogenen Daten gespeichert oder an Dritte weitergegeben. Die Seite lädt keinerlei externe Ressourcen nach — auch keine Schriftarten von Drittanbietern wie Google Fonts. Alle Schriften stammen aus der auf dem jeweiligen Gerät bereits installierten System-Schriftauswahl.</p>
+      </div>
+
+      <div class="legal-block" id="impressum">
+        <h3>Impressum</h3>
+        <p>Angaben gemäß § 5 TMG. Die Kontaktdaten sind aus Datenschutzgründen als Grafik hinterlegt und daher nicht direkt als Text kopierbar.</p>
+        <img
+          class="impressum-img"
+          src="assets/impressum.svg"
+          alt="Impressum: Oliver Held, Danziger Straße 2, 31675 Bückeburg. Kontakt per E-Mail über die auf der Grafik gezeigte Adresse."
+          draggable="false">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <p style="max-width:46ch;">csv2pdf-gui ist eine Python-Neuimplementierung des Original-Bash-Skripts der Lutherschule Hannover — 100&nbsp;% KI programmiert, quelloffen einsehbar auf GitHub.</p>
+    <nav class="footer-links">
+      <a href="https://github.com/Lutherschule30167/csv2pdf-gui">GitHub-Repository</a>
+      <a href="https://github.com/Lutherschule30167/csv2pdf-gui/issues">Probleme melden</a>
+      <a href="#rechtliches">Impressum &amp; Rechtliches</a>
+      <a href="#top">Nach oben</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
