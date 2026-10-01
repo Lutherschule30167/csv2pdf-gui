@@ -96,7 +96,7 @@ class App(tk.Tk):
         self.worker_running = False
 
         cfg = backend.load_config()
-        default_dir = cfg.get("export_dir") or os.path.join(SCRIPT_DIR, "export_auszuege")
+        default_dir = cfg.get("export_dir") or os.path.join(backend.app_dir(), "export_auszuege")
         self.export_dir = tk.StringVar(value=default_dir)
         self.delete_csv = tk.BooleanVar(value=cfg.get("delete_csv", False))
         self.logo_path = tk.StringVar(value=cfg.get("logo_path", ""))
@@ -345,7 +345,7 @@ class App(tk.Tk):
     def _choose_dir(self):
         chosen = filedialog.askdirectory(
             title="Exportordner mit den StarMoney-CSV-Dateien waehlen",
-            initialdir=self.export_dir.get() if os.path.isdir(self.export_dir.get()) else SCRIPT_DIR,
+            initialdir=self.export_dir.get() if os.path.isdir(self.export_dir.get()) else backend.app_dir(),
         )
         if chosen:
             self.export_dir.set(chosen)
