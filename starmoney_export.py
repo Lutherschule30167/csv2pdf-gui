@@ -160,12 +160,26 @@ def app_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+def user_config_path():
+    """Ausweich-Speicherort fuer config.json, falls der Programmordner nicht
+    beschreibbar ist (z.B. EXE unter C:\\Program Files): %APPDATA%\\csv2pdf
+    unter Windows, sonst ~/.config/csv2pdf."""
+    base = os.environ.get("APPDATA") or os.path.join(os.path.expanduser("~"), ".config")
+    return os.path.join(base, "csv2pdf", "config.json")
+
+
 def config_path():
+    """config.json neben Skript/EXE - ausser es existiert bereits eine im
+    Ausweichordner (wurde angelegt, weil der Programmordner schreibgeschuetzt
+    war); dann gilt diese."""
+    fallback = user_config_path()
+    if os.path.isfile(fallback):
+        return fallback
     return os.path.join(app_dir(), "config.json")
 
 
 def load_config():
-    """Liest config.json neben dem Skript. Fehlt die Datei oder ist sie
+    """Liest config.json (siehe config_path()). Fehlt die Datei oder ist sie
     beschaedigt, werden einfach die Standardwerte zurueckgegeben."""
     cfg = dict(DEFAULT_CONFIG)
     try:
@@ -185,9 +199,20 @@ def save_config(updates):
     bestehende (nicht uebergebene) Werte bleiben erhalten."""
     merged = load_config()
     merged.update({k: v for k, v in updates.items() if k in DEFAULT_CONFIG})
-    with open(config_path(), "w", encoding="utf-8") as fh:
-        json.dump(merged, fh, ensure_ascii=False, indent=2)
+    try:
+        _write_config(config_path(), merged)
+    except OSError:
+        # Programmordner schreibgeschuetzt -> in den Ausweichordner speichern;
+        # ab dann liest load_config() automatisch von dort.
+        fallback = user_config_path()
+        os.makedirs(os.path.dirname(fallback), exist_ok=True)
+        _write_config(fallback, merged)
     return merged
+
+
+def _write_config(path, cfg):
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(cfg, fh, ensure_ascii=False, indent=2)
 
 
 # ---------------------------------------------------------------------------

@@ -43,8 +43,9 @@ jobs:
 
       - name: EXEs bauen
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name csv2pdf-gui starmoney_gui.py
-          python -m PyInstaller --noconfirm --clean --onefile --console --name csv2pdf starmoney_export.py
+          python make_version_info.py
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --icon csv2pdf.ico --version-file version_info.txt --add-data "csv2pdf.ico;." --name csv2pdf-gui starmoney_gui.py
+          python -m PyInstaller --noconfirm --clean --onefile --console --icon csv2pdf.ico --version-file version_info.txt --name csv2pdf starmoney_export.py
 
       - name: Kurztest der Kommandozeilen-EXE
         run: dist\csv2pdf.exe --version

@@ -166,6 +166,11 @@ nav.primary-nav a:hover { color: var(--ink); }
   font-size: 0.82rem;
   color: var(--ink-soft);
 }
+.hero .meta-line + .meta-line { margin-top: 6px; }
+.hero .btn-download { padding: 15px 28px; font-size: 1.05rem; font-weight: 600; }
+@media (max-width: 480px) {
+  .hero .btn-download { white-space: normal; width: 100%; justify-content: center; text-align: center; }
+}
 .hero-art img { width: 100%; height: auto; }
 
 /* ---------- Section scaffolding ---------- */
@@ -375,7 +380,7 @@ footer.site-footer {
   .hero-art { order: -1; max-width: 380px; margin: 0 auto; }
   .intro-grid { grid-template-columns: 1fr; }
   .feature-grid { grid-template-columns: 1fr 1fr; }
-  .config-grid { grid-template-columns: 1fr; }
+  .config-grid { grid-template-columns: minmax(0, 1fr); }
   .download-grid { grid-template-columns: 1fr; }
 }
 
