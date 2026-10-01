@@ -4,3 +4,4 @@ dist/
 *.spec
 config.json
 export_auszuege/
+version_info.txt

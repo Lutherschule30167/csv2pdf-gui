@@ -230,7 +230,11 @@ unter **Assets** angehaengt:
   `python starmoney_export.py`)
 
 Die EXE einfach in einen eigenen Ordner legen. `config.json` und der
-Standardordner `export_auszuege` liegen dann neben der .exe. Beim ersten
+Standardordner `export_auszuege` liegen dann neben der .exe. Ist dieser
+Ordner schreibgeschuetzt (z.B. `C:\Program Files`), speichert das Programm
+die Einstellungen stattdessen unter `%APPDATA%\csv2pdf\config.json`.
+Name und Version stehen in den Dateieigenschaften der EXE (Rechtsklick ->
+Eigenschaften -> Details). Beim ersten
 Start warnt Windows SmartScreen eventuell ("Unbekannter Herausgeber"), da
 die EXE nicht signiert ist: **Weitere Informationen -> Trotzdem
 ausfuehren**.

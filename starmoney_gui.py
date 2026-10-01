@@ -89,6 +89,15 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(f"StarMoney-Kontoauszuege erstellen (Version {backend.__version__})")
+        # Fenstersymbol: liegt neben dem Skript bzw. ist in die EXE eingebettet
+        # (sys._MEIPASS = Entpackordner von PyInstaller). Fehlt es, bleibt
+        # einfach das Standardsymbol.
+        icon = os.path.join(getattr(sys, "_MEIPASS", SCRIPT_DIR), "csv2pdf.ico")
+        if sys.platform.startswith("win") and os.path.isfile(icon):
+            try:
+                self.iconbitmap(icon)
+            except tk.TclError:
+                pass
         self.geometry("760x600")
         self.minsize(640, 480)
 
