@@ -1,5 +1,7 @@
 # StarMoney-Kontoauszug-Generator (Windows-Portierung)
 
+Version 0.2
+
 Python-Neuimplementierung des Original-Bash-Skripts fuer die Lutherschule
 Hannover. Erzeugt aus StarMoney-CSV-Exporten formatierte PDF-Kontoauszuege
 mit Kopfbereich (Logo/Kontoname/Datum) - lauffaehig unter Windows, ohne die
@@ -166,6 +168,8 @@ python starmoney_export.py [Exportverzeichnis] [--delete-csv] [--watch [SEKUNDEN
   Bereits verarbeitete Dateien werden bei folgenden Pruefungen nicht
   erneut angefasst, auch wenn sie (ohne `--delete-csv`) im Ordner bleiben.
   Beispiel: `python starmoney_export.py --watch 60`
+- `--version` zeigt die installierte Version an (die GUI zeigt sie in der
+  Titelleiste).
 - Alternativ Doppelklick auf `start_export.bat` (nutzt den Ordner
   `export_auszuege` neben der .bat-Datei, ohne GUI, einmaliger Lauf ohne
   `--watch`).

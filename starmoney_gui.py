@@ -88,7 +88,7 @@ def open_folder(path):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("StarMoney-Kontoauszuege erstellen")
+        self.title(f"StarMoney-Kontoauszuege erstellen (Version {backend.__version__})")
         self.geometry("760x600")
         self.minsize(640, 480)
 
