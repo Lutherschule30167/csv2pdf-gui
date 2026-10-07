@@ -35,4 +35,25 @@
       document.getElementById(panelId).classList.add('active');
     });
   });
+
+  // Datum der aktuellen csv2pdf-gui.exe aus dem neuesten Release laden.
+  // Ohne Netz oder bei API-Limit bleibt das Datum aus dem HTML stehen.
+  var exeDates = document.querySelectorAll('.exe-date');
+  if (exeDates.length && window.fetch) {
+    fetch('https://api.github.com/repos/Lutherschule30167/csv2pdf-gui/releases/latest')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (release) {
+        if (!release || !release.assets) return;
+        var exe = release.assets.filter(function (a) { return a.name === 'csv2pdf-gui.exe'; })[0];
+        if (!exe) return;
+        var d = new Date(exe.updated_at);
+        if (isNaN(d)) return;
+        var text = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+        exeDates.forEach(function (el) {
+          el.textContent = text;
+          el.setAttribute('datetime', exe.updated_at.slice(0, 10));
+        });
+      })
+      .catch(function () {});
+  }
 })();
