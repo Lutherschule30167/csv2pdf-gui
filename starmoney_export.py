@@ -118,7 +118,7 @@ PROJECT_HOMEPAGE = "https://lutherschule30167.github.io/csv2pdf-gui/"
 CREDIT_SIZE = 6
 CREDIT_Y = 18  # Grundlinie, unterhalb von BOTTOM_MARGIN
 CREDIT_COLOR = colors.Color(0.45, 0.45, 0.45)
-HEART_COLOR = colors.Color(0.80, 0.10, 0.20)
+CREDIT_ACCENT_COLOR = colors.HexColor("#d60b52")  # Herz und Link
 
 # Maximale Logo-Groesse im Kopfbereich. Entspricht exakt der Box, auf die
 # das Original-Bash-Skript das feste Lutherschullogo per ImageMagick
@@ -694,13 +694,13 @@ def draw_credit(c, width, font):
     c.setFillColor(CREDIT_COLOR)
     c.drawString(x, y, before)
     x += w_before + gap
-    c.setFillColor(HEART_COLOR)
+    c.setFillColor(CREDIT_ACCENT_COLOR)
     draw_heart(c, x, y - size * 0.05, heart)
     x += heart + gap
     c.setFillColor(CREDIT_COLOR)
     c.drawString(x, y, after)
     x += w_after + gap
-    c.setFillColor(LINK_COLOR)
+    c.setFillColor(CREDIT_ACCENT_COLOR)
     c.drawString(x, y, link)
     c.linkURL(PROJECT_HOMEPAGE, (x, y - 2, x + w_link, y + size + 1), relative=0)
     c.restoreState()
