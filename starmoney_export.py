@@ -109,6 +109,17 @@ FOOTER_TOP_GAP = 14  # Abstand zwischen letzter Buchungszeile und Fusszeilenbere
 FOOTER_TITLE_SIZE = 7
 FOOTER_LINK_SIZE = 6
 
+# Hinweis "Made with <Herz> and csv2pdf-gui" ganz unten rechtsbuendig auf
+# jeder Seite; "csv2pdf-gui" ist ein Link zur Projekthomepage. Das Herz wird
+# als Vektorgrafik gezeichnet statt als Schriftzeichen -- die PDF-
+# Standardschriften enthalten kein U+2764, und so muss keine zusaetzliche
+# Schriftdatei mitgeliefert werden (funktioniert auch in der Windows-EXE).
+PROJECT_HOMEPAGE = "https://lutherschule30167.github.io/csv2pdf-gui/"
+CREDIT_SIZE = 6
+CREDIT_Y = 18  # Grundlinie, unterhalb von BOTTOM_MARGIN
+CREDIT_COLOR = colors.Color(0.45, 0.45, 0.45)
+HEART_COLOR = colors.Color(0.80, 0.10, 0.20)
+
 # Maximale Logo-Groesse im Kopfbereich. Entspricht exakt der Box, auf die
 # das Original-Bash-Skript das feste Lutherschullogo per ImageMagick
 # begrenzt hat ("convert -resize 156x120" auf einer 2x-aufgeloesten
@@ -649,13 +660,72 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
     return fy
 
 
+def draw_heart(c, x, y, size):
+    """Zeichnet ein gefuelltes Herz, dessen linke untere Ecke der
+    umgebenden Box (size x size) bei (x, y) liegt."""
+    s = size
+    p = c.beginPath()
+    p.moveTo(x + 0.5 * s, y)
+    p.curveTo(x + 0.15 * s, y + 0.30 * s, x, y + 0.45 * s, x, y + 0.68 * s)
+    p.curveTo(x, y + 0.90 * s, x + 0.18 * s, y + s, x + 0.30 * s, y + s)
+    p.curveTo(x + 0.42 * s, y + s, x + 0.48 * s, y + 0.92 * s, x + 0.5 * s, y + 0.82 * s)
+    p.curveTo(x + 0.52 * s, y + 0.92 * s, x + 0.58 * s, y + s, x + 0.70 * s, y + s)
+    p.curveTo(x + 0.82 * s, y + s, x + s, y + 0.90 * s, x + s, y + 0.68 * s)
+    p.curveTo(x + s, y + 0.45 * s, x + 0.85 * s, y + 0.30 * s, x + 0.5 * s, y)
+    p.close()
+    c.drawPath(p, stroke=0, fill=1)
+
+
+def draw_credit(c, width, font):
+    """Zeichnet "Made with <Herz> and csv2pdf-gui" rechtsbuendig an den
+    unteren Seitenrand; "csv2pdf-gui" ist ein Link zur Projekthomepage."""
+    size = CREDIT_SIZE
+    heart = size * 0.85
+    gap = c.stringWidth(" ", font, size)
+    before, after, link = "Made with", "and", "csv2pdf-gui"
+    w_before = c.stringWidth(before, font, size)
+    w_after = c.stringWidth(after, font, size)
+    w_link = c.stringWidth(link, font, size)
+    x = width - SIDE_MARGIN - (w_before + gap + heart + gap + w_after + gap + w_link)
+    y = CREDIT_Y
+
+    c.saveState()
+    c.setFont(font, size)
+    c.setFillColor(CREDIT_COLOR)
+    c.drawString(x, y, before)
+    x += w_before + gap
+    c.setFillColor(HEART_COLOR)
+    draw_heart(c, x, y - size * 0.05, heart)
+    x += heart + gap
+    c.setFillColor(CREDIT_COLOR)
+    c.drawString(x, y, after)
+    x += w_after + gap
+    c.setFillColor(LINK_COLOR)
+    c.drawString(x, y, link)
+    c.linkURL(PROJECT_HOMEPAGE, (x, y - 2, x + w_link, y + size + 1), relative=0)
+    c.restoreState()
+
+
+class CreditCanvas(canvas.Canvas):
+    """Canvas, das vor jedem Seitenabschluss (auch beim letzten save())
+    automatisch den Hinweis "Made with <Herz> and csv2pdf-gui" zeichnet."""
+
+    def __init__(self, *args, credit_font=DEFAULT_HEADER_FONT, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._credit_font = credit_font
+
+    def showPage(self):
+        draw_credit(self, self._pagesize[0], self._credit_font)
+        super().showPage()
+
+
 def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
              header_font_normal=DEFAULT_HEADER_FONT,
              header_font_bold=STANDARD_HEADER_FONTS[DEFAULT_HEADER_FONT],
              hint_text=DEFAULT_HINT_TEXT,
              soll=0.0, haben=0.0, gesamtsaldo=0.0,
              footer_links=None):
-    c = canvas.Canvas(out_path, pagesize=A4)
+    c = CreditCanvas(out_path, pagesize=A4, credit_font=header_font_normal)
     width, height = A4
 
     # -- Kopfbereich nur auf Seite 1 --
