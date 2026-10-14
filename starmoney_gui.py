@@ -145,6 +145,7 @@ class App(tk.Tk):
         ttk.Label(top, text="Exportordner:").pack(side="left")
         ttk.Entry(top, textvariable=self.export_dir).pack(side="left", fill="x", expand=True, padx=(6, 6))
         ttk.Button(top, text="Ordner waehlen...", command=self._choose_dir).pack(side="left")
+        ttk.Button(top, text="Aktualisieren", command=self._refresh_csv_count).pack(side="left", padx=(6, 0))
 
         info = ttk.Frame(self)
         info.pack(fill="x", **pad)
