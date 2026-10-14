@@ -1,7 +1,7 @@
 name: Windows-EXE bauen
 
-# Baut die EXEs beim Veroeffentlichen eines Releases und haengt sie an das
-# Release an. Zusaetzlich manuell unter "Actions" startbar; dann liegen die
+# Baut die EXEs beim Veröffentlichen eines Releases und hängt sie an das
+# Release an. Zusätzlich manuell unter "Actions" startbar; dann liegen die
 # EXEs nur als Workflow-Artefakt zum Download bereit.
 # Vorabversionen zum Testen kommen vom Branch alpha: __version__ dort z.B.
 # auf "0.3.0-alpha.1" setzen, Tag v0.3.0-alpha.1 mit Target alpha anlegen
@@ -19,7 +19,7 @@ jobs:
     runs-on: windows-latest
     steps:
       # Vorabversionen (Tag mit Bindestrich, z.B. v0.3.0-alpha.1 vom Branch
-      # alpha) muessen als Pre-Release markiert sein. Sonst gilt die Alpha als
+      # alpha) müssen als Pre-Release markiert sein. Sonst gilt die Alpha als
       # "neueste Version" und die Download-Links auf Homepage und README
       # (releases/latest) liefern sie an alle aus.
       - name: Vorabversion als Pre-Release markieren
@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: |
           TAG="${{ github.event.release.tag_name }}"
-          echo "::warning::$TAG ist eine Vorabversion, wurde aber nicht als Pre-Release veroeffentlicht. Wird jetzt nachgeholt."
+          echo "::warning::$TAG ist eine Vorabversion, wurde aber nicht als Pre-Release veröffentlicht. Wird jetzt nachgeholt."
           gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease --latest=false
 
       - uses: actions/checkout@v4
@@ -38,12 +38,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Abhaengigkeiten installieren
+      - name: Abhängigkeiten installieren
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt pyinstaller Pillow
 
-      - name: Version pruefen
+      - name: Version prüfen
         id: version
         shell: bash
         run: |
@@ -54,7 +54,7 @@ jobs:
             TAG="${{ github.event.release.tag_name }}"
             # v0.2 und v0.2.0 passen beide zu __version__ = "0.2"
             if [ "${TAG#v}" != "$VERSION" ] && [ "${TAG#v}" != "$VERSION.0" ]; then
-              # Abbrechen statt nur warnen: sonst haengt eine EXE mit falscher
+              # Abbrechen statt nur warnen: sonst hängt eine EXE mit falscher
               # Versionsnummer am Release (z.B. Tag auf einem Commit vor dem
               # Versionssprung).
               echo "::error::Release-Tag $TAG passt nicht zu __version__ = $VERSION in starmoney_export.py. Tag auf den richtigen Commit setzen und Release neu anlegen."
@@ -76,7 +76,7 @@ jobs:
           name: csv2pdf-gui-${{ steps.version.outputs.version }}-windows
           path: dist/*.exe
 
-      - name: An Release anhaengen
+      - name: An Release anhängen
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}

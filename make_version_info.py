@@ -1,4 +1,4 @@
-"""Erzeugt version_info.txt fuer PyInstaller (--version-file), damit die EXE
+"""Erzeugt version_info.txt für PyInstaller (--version-file), damit die EXE
 unter Eigenschaften -> Details Name und Version anzeigt. Die Version kommt
 aus __version__ in starmoney_export.py (einzige Stelle, an der sie gepflegt
 wird).
@@ -23,7 +23,7 @@ TEMPLATE = f"""VSVersionInfo(
   kids=[
     StringFileInfo([StringTable('040704B0', [
       StringStruct('ProductName', 'csv2pdf'),
-      StringStruct('FileDescription', 'StarMoney-CSV in PDF-Kontoauszuege umwandeln'),
+      StringStruct('FileDescription', 'StarMoney-CSV in PDF-Kontoauszüge umwandeln'),
       StringStruct('CompanyName', 'Lutherschule Hannover'),
       StringStruct('FileVersion', '{version}'),
       StringStruct('ProductVersion', '{version}'),
@@ -35,4 +35,4 @@ TEMPLATE = f"""VSVersionInfo(
 
 with open(os.path.join(HERE, "version_info.txt"), "w", encoding="utf-8") as fh:
     fh.write(TEMPLATE)
-print(f"version_info.txt fuer Version {version} geschrieben")
+print(f"version_info.txt für Version {version} geschrieben")

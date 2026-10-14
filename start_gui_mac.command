@@ -1,4 +1,4 @@
 #!/bin/bash
-# Doppelklick-Starter fuer macOS (grafische Oberflaeche).
+# Doppelklick-Starter für macOS (grafische Oberfläche).
 cd "$(dirname "$0")"
 python3 starmoney_gui.py

@@ -19,8 +19,8 @@ Website: https://lutherschule30167.github.io/csv2pdf-gui/
    geschützt“. Das ist normal bei kleinen Programmen ohne kostenpflichtige
    Signatur. Auf **Weitere Informationen** und dann auf **Trotzdem
    ausführen** klicken. Danach startet das Programm ohne Rückfrage.
-4. **Kontoauszüge erstellen:** Mit **Ordner waehlen…** den Ordner mit den
-   StarMoney-Exporten auswählen und auf **Kontoauszuege erstellen** klicken.
+4. **Kontoauszüge erstellen:** Mit **Ordner wählen…** den Ordner mit den
+   StarMoney-Exporten auswählen und auf **Kontoauszüge erstellen** klicken.
 
 Es wird nichts installiert, und Sie brauchen keine Administratorrechte.
 
@@ -47,15 +47,15 @@ Auszug stehen sollen, und verwenden Sie im Namen selbst keinen Unterstrich.
 
 ## Das Programm benutzen
 
-- **Ordner waehlen…** – den Ordner mit den StarMoney-Exporten auswählen.
+- **Ordner wählen…** – den Ordner mit den StarMoney-Exporten auswählen.
   Das Programm merkt sich den Ordner für den nächsten Start.
-- **Kontoauszuege erstellen** – erstellt für jeden Export ein PDF. Was
+- **Kontoauszüge erstellen** – erstellt für jeden Export ein PDF. Was
   passiert, steht im Protokollfeld darunter.
-- **Ordner oeffnen** – zeigt die fertigen PDFs. Sie liegen im selben
+- **Ordner öffnen** – zeigt die fertigen PDFs. Sie liegen im selben
   Ordner wie die Exporte, benannt nach Kontoname und Datum.
-- **Original-CSV-Dateien … loeschen** – normalerweise aus. Die Exporte aus
+- **Original-CSV-Dateien … löschen** – normalerweise aus. Die Exporte aus
   StarMoney bleiben dann unangetastet.
-- **Ordner automatisch … ueberwachen** – schaut regelmäßig in den Ordner
+- **Ordner automatisch … überwachen** – schaut regelmäßig in den Ordner
   und verarbeitet neue Exporte von selbst. Bereits erledigte bleiben
   unangetastet. Muss bei jedem Programmstart neu angehakt werden.
 
