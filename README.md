@@ -66,7 +66,8 @@ gespeichert:
 
 - **Logo:** ein beliebiges Bild (PNG, JPG, GIF oder BMP), zum Beispiel das
   Schullogo. Es wird automatisch passend verkleinert. Kein Logo? Dann
-  bleibt der Kopf einfach leer.
+  bleibt der Kopf einfach leer. Schneller geht es im Hauptfenster: einfach
+  auf das Logo klicken und ein neues Bild wählen.
 - **Kopf-Schriftart:** Schrift für Kontoname, Datum und Hinweistext.
   Mehrere Schriften stehen zur Auswahl, auf Wunsch auch eine eigene
   Schriftdatei.
