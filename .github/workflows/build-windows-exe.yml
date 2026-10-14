@@ -3,6 +3,9 @@ name: Windows-EXE bauen
 # Baut die EXEs beim Veroeffentlichen eines Releases und haengt sie an das
 # Release an. Zusaetzlich manuell unter "Actions" startbar; dann liegen die
 # EXEs nur als Workflow-Artefakt zum Download bereit.
+# Vorabversionen zum Testen kommen vom Branch alpha: __version__ dort z.B.
+# auf "0.3.0-alpha.1" setzen, Tag v0.3.0-alpha.1 mit Target alpha anlegen
+# und "Set as a pre-release" anhaken.
 on:
   release:
     types: [published]
@@ -15,6 +18,20 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      # Vorabversionen (Tag mit Bindestrich, z.B. v0.3.0-alpha.1 vom Branch
+      # alpha) muessen als Pre-Release markiert sein. Sonst gilt die Alpha als
+      # "neueste Version" und die Download-Links auf Homepage und README
+      # (releases/latest) liefern sie an alle aus.
+      - name: Vorabversion als Pre-Release markieren
+        if: github.event_name == 'release' && contains(github.event.release.tag_name, '-') && !github.event.release.prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          echo "::warning::$TAG ist eine Vorabversion, wurde aber nicht als Pre-Release veroeffentlicht. Wird jetzt nachgeholt."
+          gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease --latest=false
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
