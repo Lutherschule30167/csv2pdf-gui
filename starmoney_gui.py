@@ -151,21 +151,24 @@ class App(tk.Tk):
         self.count_label = ttk.Label(info, text="")
         self.count_label.pack(side="left")
 
-        # -- Nur die Anzeige des aktuell eingestellten Logos bleibt im
-        # Hauptfenster sichtbar; Aendern geschieht ueber Optionen ->
-        # Einstellungen (siehe _open_settings).
+        # -- Logo steht allein und zentriert; ein Klick darauf oeffnet
+        # direkt den Dateidialog (wie "Durchsuchen..." in den
+        # Einstellungen). Entfernen geht weiterhin ueber Optionen ->
+        # Einstellungen.
         logo_display = ttk.Frame(self)
         logo_display.pack(fill="x", padx=10, pady=(0, 6))
-        ttk.Label(logo_display, text="Aktuelles Logo:").pack(side="left")
         self.logo_preview_label = ttk.Label(
             logo_display, text="(kein Logo eingestellt)", foreground="#555555",
-            relief="groove", anchor="center", justify="center",
+            relief="groove", anchor="center", justify="center", cursor="hand2",
         )
-        self.logo_preview_label.pack(side="left", padx=(8, 0))
-        ttk.Label(
-            logo_display, text="(aenderbar unter Optionen -> Einstellungen)",
-            foreground="#777777",
-        ).pack(side="left", padx=(10, 0))
+        self.logo_preview_label.pack(anchor="center")
+        self.logo_preview_label.bind("<Button-1>", lambda *_: self._choose_logo())
+        logo_hint = ttk.Label(
+            logo_display, text="Logo anklicken, um es zu aendern",
+            foreground="#777777", cursor="hand2",
+        )
+        logo_hint.pack(anchor="center", pady=(2, 0))
+        logo_hint.bind("<Button-1>", lambda *_: self._choose_logo())
 
         opts = ttk.Frame(self)
         opts.pack(fill="x", **pad)
@@ -361,7 +364,11 @@ class App(tk.Tk):
             self._save_settings()
 
     def _choose_logo(self):
-        chosen = filedialog.askopenfilename(title="Logo-Bilddatei waehlen", filetypes=BILD_FILETYPES)
+        current = self.logo_path.get().strip()
+        chosen = filedialog.askopenfilename(
+            title="Logo-Bilddatei waehlen", filetypes=BILD_FILETYPES,
+            initialdir=os.path.dirname(current) if current and os.path.isdir(os.path.dirname(current)) else None,
+        )
         if chosen:
             self.logo_path.set(chosen)
             self._save_settings()
