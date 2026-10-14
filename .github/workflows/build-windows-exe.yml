@@ -37,7 +37,11 @@ jobs:
             TAG="${{ github.event.release.tag_name }}"
             # v0.2 und v0.2.0 passen beide zu __version__ = "0.2"
             if [ "${TAG#v}" != "$VERSION" ] && [ "${TAG#v}" != "$VERSION.0" ]; then
-              echo "::warning::Release-Tag $TAG passt nicht zu __version__ = $VERSION in starmoney_export.py"
+              # Abbrechen statt nur warnen: sonst haengt eine EXE mit falscher
+              # Versionsnummer am Release (z.B. Tag auf einem Commit vor dem
+              # Versionssprung).
+              echo "::error::Release-Tag $TAG passt nicht zu __version__ = $VERSION in starmoney_export.py. Tag auf den richtigen Commit setzen und Release neu anlegen."
+              exit 1
             fi
           fi
 
