@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-StarMoney-Kontoauszuege -- einfache GUI fuer Endbenutzer
+StarMoney-Kontoauszüge -- einfache GUI für Endbenutzer
 =========================================================
 
-Grafische Oberflaeche fuer starmoney_export.py. Muss im selben Ordner wie
+Grafische Oberfläche für starmoney_export.py. Muss im selben Ordner wie
 diese Datei liegen. Verwendet nur die Python-Standardbibliothek (tkinter)
-fuer die Oberflaeche -- keine zusaetzliche Abhaengigkeit noetig ausser
-reportlab (siehe requirements.txt), das starmoney_export.py fuer die
+für die Oberfläche -- keine zusätzliche Abhängigkeit nötig außer
+reportlab (siehe requirements.txt), das starmoney_export.py für die
 PDF-Erzeugung braucht.
 
 Logo und Kopf-Schriftart sind hier ebenfalls einstellbar (kein festes
@@ -17,7 +17,7 @@ die Kommandozeilenversion (--save-config) nutzt.
 Start (Doppelklick oder):
     python starmoney_gui.py
 
-Entstanden mit Unterstuetzung von Claude (Anthropic).
+Entstanden mit Unterstützung von Claude (Anthropic).
 Lizenz: MIT
 """
 
@@ -39,7 +39,7 @@ except ImportError:
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # starmoney_export.py muss im selben Ordner liegen. Konfiguration
-# (Logo/Schriftart/Exportordner/...) wird komplett von dort uebernommen,
+# (Logo/Schriftart/Exportordner/...) wird komplett von dort übernommen,
 # damit CLI und GUI dieselbe config.json teilen.
 try:
     sys.path.insert(0, SCRIPT_DIR)
@@ -66,9 +66,9 @@ FONT_FILETYPES = [
     ("Alle Dateien", "*.*"),
 ]
 
-# Vorschaugroesse in Pixel -- bewusst im selben Seitenverhaeltnis wie die
-# tatsaechliche Begrenzung im PDF (siehe backend.LOGO_MAX_WIDTH/HEIGHT,
-# 78x60 pt), nur groesser dargestellt, damit man im Fenster etwas erkennt.
+# Vorschaugröße in Pixel -- bewusst im selben Seitenverhältnis wie die
+# tatsächliche Begrenzung im PDF (siehe backend.LOGO_MAX_WIDTH/HEIGHT,
+# 78x60 pt), nur größer dargestellt, damit man im Fenster etwas erkennt.
 PREVIEW_MAX_W = 156
 PREVIEW_MAX_H = 120
 
@@ -82,13 +82,13 @@ def open_folder(path):
         else:
             subprocess.Popen(["xdg-open", path])
     except Exception as exc:
-        messagebox.showwarning("Ordner oeffnen", f"Ordner konnte nicht geoeffnet werden:\n{exc}")
+        messagebox.showwarning("Ordner öffnen", f"Ordner konnte nicht geöffnet werden:\n{exc}")
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"StarMoney-Kontoauszuege erstellen (Version {backend.__version__})")
+        self.title(f"StarMoney-Kontoauszüge erstellen (Version {backend.__version__})")
         # Fenstersymbol: liegt neben dem Skript bzw. ist in die EXE eingebettet
         # (sys._MEIPASS = Entpackordner von PyInstaller). Fehlt es, bleibt
         # einfach das Standardsymbol.
@@ -144,7 +144,7 @@ class App(tk.Tk):
         top.pack(fill="x", **pad)
         ttk.Label(top, text="Exportordner:").pack(side="left")
         ttk.Entry(top, textvariable=self.export_dir).pack(side="left", fill="x", expand=True, padx=(6, 6))
-        ttk.Button(top, text="Ordner waehlen...", command=self._choose_dir).pack(side="left")
+        ttk.Button(top, text="Ordner wählen...", command=self._choose_dir).pack(side="left")
         ttk.Button(top, text="Aktualisieren", command=self._refresh_csv_count).pack(side="left", padx=(6, 0))
 
         info = ttk.Frame(self)
@@ -152,9 +152,9 @@ class App(tk.Tk):
         self.count_label = ttk.Label(info, text="")
         self.count_label.pack(side="left")
 
-        # -- Logo steht allein und zentriert; ein Klick darauf oeffnet
+        # -- Logo steht allein und zentriert; ein Klick darauf öffnet
         # direkt den Dateidialog (wie "Durchsuchen..." in den
-        # Einstellungen). Entfernen geht weiterhin ueber Optionen ->
+        # Einstellungen). Entfernen geht weiterhin über Optionen ->
         # Einstellungen.
         logo_display = ttk.Frame(self)
         logo_display.pack(fill="x", padx=10, pady=(0, 6))
@@ -165,7 +165,7 @@ class App(tk.Tk):
         self.logo_preview_label.pack(anchor="center")
         self.logo_preview_label.bind("<Button-1>", lambda *_: self._choose_logo())
         logo_hint = ttk.Label(
-            logo_display, text="Logo anklicken, um es zu aendern",
+            logo_display, text="Logo anklicken, um es zu ändern",
             foreground="#777777", cursor="hand2",
         )
         logo_hint.pack(anchor="center", pady=(2, 0))
@@ -175,23 +175,23 @@ class App(tk.Tk):
         opts.pack(fill="x", **pad)
         ttk.Checkbutton(
             opts,
-            text="Original-CSV-Dateien nach erfolgreicher Verarbeitung loeschen",
+            text="Original-CSV-Dateien nach erfolgreicher Verarbeitung löschen",
             variable=self.delete_csv,
             command=self._save_settings,
         ).pack(side="left")
 
         actions = ttk.Frame(self)
         actions.pack(fill="x", **pad)
-        self.run_button = ttk.Button(actions, text="Kontoauszuege erstellen", command=self._start_run)
+        self.run_button = ttk.Button(actions, text="Kontoauszüge erstellen", command=self._start_run)
         self.run_button.pack(side="left")
-        self.open_button = ttk.Button(actions, text="Ordner oeffnen", command=self._open_export_dir)
+        self.open_button = ttk.Button(actions, text="Ordner öffnen", command=self._open_export_dir)
         self.open_button.pack(side="left", padx=(8, 0))
 
         watch_row = ttk.Frame(self)
         watch_row.pack(fill="x", **pad)
         ttk.Checkbutton(
             watch_row,
-            text="Ordner automatisch auf neue CSV-Dateien ueberwachen, alle",
+            text="Ordner automatisch auf neue CSV-Dateien überwachen, alle",
             variable=self.watch_enabled,
             command=self._toggle_watch,
         ).pack(side="left")
@@ -200,7 +200,7 @@ class App(tk.Tk):
             textvariable=self.watch_interval, justify="right",
         ).pack(side="left", padx=(4, 4))
         ttk.Label(watch_row, text="Sekunden").pack(side="left")
-        self.watch_status_label = ttk.Label(watch_row, text="Ueberwachung inaktiv", foreground="#555555")
+        self.watch_status_label = ttk.Label(watch_row, text="Überwachung inaktiv", foreground="#555555")
         self.watch_status_label.pack(side="left", padx=(10, 0))
 
         self.progress = ttk.Progressbar(self, mode="indeterminate")
@@ -220,10 +220,10 @@ class App(tk.Tk):
 
     # ------------------------------------------------------------------
     def _open_settings(self):
-        """Oeffnet den Einstellungen-Dialog (Optionen -> Einstellungen).
+        """Öffnet den Einstellungen-Dialog (Optionen -> Einstellungen).
         Die Widgets darin sind an dieselben StringVar/BooleanVar gebunden
-        wie ueberall sonst -- Aenderungen dort aktualisieren live auch die
-        Logo-Vorschau im Hauptfenster (ueber den bestehenden trace_add),
+        wie überall sonst -- Änderungen dort aktualisieren live auch die
+        Logo-Vorschau im Hauptfenster (über den bestehenden trace_add),
         ganz ohne doppelten Zustand."""
         if getattr(self, "_settings_win", None) is not None and self._settings_win.winfo_exists():
             self._settings_win.lift()
@@ -231,7 +231,7 @@ class App(tk.Tk):
             return
 
         win = tk.Toplevel(self)
-        win.title("Einstellungen fuer den Kopfbereich der PDFs")
+        win.title("Einstellungen für den Kopfbereich der PDFs")
         win.resizable(False, False)
         win.transient(self)
         self._settings_win = win
@@ -250,9 +250,9 @@ class App(tk.Tk):
         ttk.Label(
             win,
             text=(f"Wird im Kopfbereich auf max. {backend.LOGO_MAX_WIDTH:.0f}\u00d7"
-                  f"{backend.LOGO_MAX_HEIGHT:.0f} pt skaliert (Seitenverhaeltnis bleibt erhalten) -\n"
-                  f"das entspricht der bisherigen Groesse des Lutherschullogos. Groessere Logos werden\n"
-                  f"automatisch verkleinert, kleinere nicht vergroessert dargestellt."),
+                  f"{backend.LOGO_MAX_HEIGHT:.0f} pt skaliert (Seitenverhältnis bleibt erhalten) -\n"
+                  f"das entspricht der bisherigen Größe des Lutherschullogos. Größere Logos werden\n"
+                  f"automatisch verkleinert, kleinere nicht vergrößert dargestellt."),
             foreground="#555555", justify="left",
         ).pack(anchor="w", padx=8, pady=(0, 8))
 
@@ -296,18 +296,18 @@ class App(tk.Tk):
 
         counter_row = ttk.Frame(win)
         counter_row.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(counter_row, text="", width=16).pack(side="left")  # Einrueckung passend zu hint_row
+        ttk.Label(counter_row, text="", width=16).pack(side="left")  # Einrückung passend zu hint_row
         self.hint_counter_label = ttk.Label(counter_row, text="", foreground="#555555")
         self.hint_counter_label.pack(side="left")
         self._update_hint_counter()
 
         ttk.Separator(win, orient="horizontal").pack(fill="x", padx=8, pady=(0, 8))
 
-        ttk.Label(win, text="Weiterfuehrende Dokumente (Fussbereich der PDFs):").pack(
+        ttk.Label(win, text="Weiterführende Dokumente (Fußbereich der PDFs):").pack(
             anchor="w", padx=8)
         ttk.Label(
             win,
-            text=("Der Name erscheint als klickbarer Link am Fuss jedes Kontoauszugs; der Link\n"
+            text=("Der Name erscheint als klickbarer Link am Fuß jedes Kontoauszugs; der Link\n"
                   "selbst wird nirgends sichtbar ausgegeben, nur als Klickziel hinterlegt."),
             foreground="#555555", justify="left",
         ).pack(anchor="w", padx=8, pady=(0, 6))
@@ -318,19 +318,19 @@ class App(tk.Tk):
         for entry in (self.footer_links or [{}, {}, {}]):
             self._add_link_row(entry.get("name", ""), entry.get("url", ""), save=False)
 
-        ttk.Button(win, text="+ Dokument hinzufuegen", command=lambda: self._add_link_row()).pack(
+        ttk.Button(win, text="+ Dokument hinzufügen", command=lambda: self._add_link_row()).pack(
             anchor="w", padx=8, pady=(4, 8))
 
-        ttk.Button(win, text="Schliessen", command=win.destroy).pack(pady=(0, 10))
+        ttk.Button(win, text="Schließen", command=win.destroy).pack(pady=(0, 10))
 
     # ------------------------------------------------------------------
     def _save_settings(self):
         """Speichert alle aktuellen Einstellungen sofort in config.json --
-        aufgerufen bei jeder bewussten Aenderung (Logo/Schriftart waehlen
-        oder entfernen, Haekchen umschalten, Ordner ausserhalb eines
-        Entry-Feldes verlassen) sowie beim Schliessen des Fensters, damit
-        nichts verloren geht, auch wenn nie "Kontoauszuege erstellen"
-        geklickt wird. Das Ueberwachen-Haekchen selbst wird bewusst NICHT
+        aufgerufen bei jeder bewussten Änderung (Logo/Schriftart wählen
+        oder entfernen, Häkchen umschalten, Ordner außerhalb eines
+        Entry-Feldes verlassen) sowie beim Schließen des Fensters, damit
+        nichts verloren geht, auch wenn nie "Kontoauszüge erstellen"
+        geklickt wird. Das Überwachen-Häkchen selbst wird bewusst NICHT
         gespeichert (siehe watch_enabled in __init__) -- nur das Intervall."""
         try:
             watch_interval = int(self.watch_interval.get())
@@ -357,7 +357,7 @@ class App(tk.Tk):
 
     def _choose_dir(self):
         chosen = filedialog.askdirectory(
-            title="Exportordner mit den StarMoney-CSV-Dateien waehlen",
+            title="Exportordner mit den StarMoney-CSV-Dateien wählen",
             initialdir=self.export_dir.get() if os.path.isdir(self.export_dir.get()) else backend.app_dir(),
         )
         if chosen:
@@ -367,7 +367,7 @@ class App(tk.Tk):
     def _choose_logo(self):
         current = self.logo_path.get().strip()
         chosen = filedialog.askopenfilename(
-            title="Logo-Bilddatei waehlen", filetypes=BILD_FILETYPES,
+            title="Logo-Bilddatei wählen", filetypes=BILD_FILETYPES,
             initialdir=os.path.dirname(current) if current and os.path.isdir(os.path.dirname(current)) else None,
         )
         if chosen:
@@ -428,7 +428,7 @@ class App(tk.Tk):
     def _update_logo_preview(self):
         path = self.logo_path.get().strip()
         if not path:
-            self.logo_preview_label.config(image="", text="(kein Logo ausgewaehlt)")
+            self.logo_preview_label.config(image="", text="(kein Logo ausgewählt)")
             self._logo_preview_image = None
             return
         if not os.path.isfile(path):
@@ -447,13 +447,13 @@ class App(tk.Tk):
             self.logo_preview_label.config(image=photo, text="")
         except Exception:
             self._logo_preview_image = None
-            hint = "" if PIL_AVAILABLE else "\n(Tipp: fuer JPG/BMP 'pip install Pillow')"
-            self.logo_preview_label.config(image="", text=f"Vorschau nicht moeglich.{hint}")
+            hint = "" if PIL_AVAILABLE else "\n(Tipp: für JPG/BMP 'pip install Pillow')"
+            self.logo_preview_label.config(image="", text=f"Vorschau nicht möglich.{hint}")
 
     @staticmethod
     def _shrink_photoimage(photo, max_w, max_h):
         """Grobe Verkleinerung ohne Pillow -- tk.PhotoImage kann nur um
-        ganzzahlige Faktoren verkleinern (subsample), das reicht fuer eine
+        ganzzahlige Faktoren verkleinern (subsample), das reicht für eine
         Vorschau."""
         w, h = photo.width(), photo.height()
         if w <= max_w and h <= max_h or w == 0 or h == 0:
@@ -462,7 +462,7 @@ class App(tk.Tk):
         return photo.subsample(int(factor), int(factor))
 
     def _choose_font(self):
-        chosen = filedialog.askopenfilename(title="Schriftdatei waehlen", filetypes=FONT_FILETYPES)
+        chosen = filedialog.askopenfilename(title="Schriftdatei wählen", filetypes=FONT_FILETYPES)
         if chosen:
             self.header_font_path.set(chosen)
             self._save_settings()
@@ -483,19 +483,19 @@ class App(tk.Tk):
         if os.path.isdir(d):
             open_folder(d)
         else:
-            messagebox.showinfo("Ordner oeffnen", "Dieser Ordner existiert noch nicht.")
+            messagebox.showinfo("Ordner öffnen", "Dieser Ordner existiert noch nicht.")
 
     # ------------------------------------------------------------------
     def _toggle_watch(self):
-        """Ein-/Ausschalten der automatischen Ordnerueberwachung. Startet
+        """Ein-/Ausschalten der automatischen Ordnerüberwachung. Startet
         nie automatisch beim Programmstart -- muss jede Sitzung bewusst
-        angeschaltet werden, da sie selbststaendig Dateien anlegt (und bei
-        aktivem "loeschen"-Haekchen auch loescht)."""
+        angeschaltet werden, da sie selbstständig Dateien anlegt (und bei
+        aktivem "löschen"-Häkchen auch löscht)."""
         if self.watch_enabled.get():
             d = self.export_dir.get().strip()
             if not d or not os.path.isdir(d):
                 messagebox.showwarning(
-                    "Kein Ordner", "Bitte zuerst einen bestehenden Exportordner waehlen.")
+                    "Kein Ordner", "Bitte zuerst einen bestehenden Exportordner wählen.")
                 self.watch_enabled.set(False)
                 return
             try:
@@ -503,7 +503,7 @@ class App(tk.Tk):
                 if interval < 1:
                     raise ValueError
             except (ValueError, tk.TclError):
-                messagebox.showwarning("Ungueltiges Intervall", "Bitte eine ganze Zahl (Sekunden) angeben.")
+                messagebox.showwarning("Ungültiges Intervall", "Bitte eine ganze Zahl (Sekunden) angeben.")
                 self.watch_enabled.set(False)
                 return
 
@@ -515,10 +515,10 @@ class App(tk.Tk):
             # Aktuellen Stand einmal normal verarbeiten (wie ein manueller
             # Klick), danach gelten alle jetzt vorhandenen CSVs als
             # "bekannt" -- nur wirklich neu hinzukommende werden von der
-            # Ueberwachung selbst noch verarbeitet.
+            # Überwachung selbst noch verarbeitet.
             self._watch_known_files = set(glob.glob(os.path.join(d, "*.csv")))
             self._launch_run(d, files=None, clear_log=True, silent=True)
-            self.watch_status_label.config(text="Ueberwachung aktiv")
+            self.watch_status_label.config(text="Überwachung aktiv")
             self._schedule_watch_tick(interval)
         else:
             self._stop_watch()
@@ -527,7 +527,7 @@ class App(tk.Tk):
         if self._watch_after_id is not None:
             self.after_cancel(self._watch_after_id)
             self._watch_after_id = None
-        self.watch_status_label.config(text="Ueberwachung inaktiv")
+        self.watch_status_label.config(text="Überwachung inaktiv")
 
     def _schedule_watch_tick(self, interval_seconds):
         self._watch_after_id = self.after(int(interval_seconds * 1000), self._watch_tick)
@@ -545,10 +545,10 @@ class App(tk.Tk):
             current = set(glob.glob(os.path.join(d, "*.csv")))
             new_files = current - self._watch_known_files
             if new_files:
-                self._append_log(f"Ueberwachung: {len(new_files)} neue CSV-Datei(en) gefunden.")
+                self._append_log(f"Überwachung: {len(new_files)} neue CSV-Datei(en) gefunden.")
                 self._launch_run(d, files=sorted(new_files), clear_log=False, silent=True)
-            # Unabhaengig vom Ergebnis als bekannt vermerken -- verhindert
-            # endloses erneutes Verarbeiten, auch wenn "loeschen" aus ist.
+            # Unabhängig vom Ergebnis als bekannt vermerken -- verhindert
+            # endloses erneutes Verarbeiten, auch wenn "löschen" aus ist.
             self._watch_known_files |= current
 
         self._schedule_watch_tick(interval)
@@ -563,7 +563,7 @@ class App(tk.Tk):
     def _start_run(self):
         d = self.export_dir.get().strip()
         if not d:
-            messagebox.showwarning("Kein Ordner", "Bitte zuerst einen Exportordner waehlen.")
+            messagebox.showwarning("Kein Ordner", "Bitte zuerst einen Exportordner wählen.")
             return
         if not os.path.isdir(d):
             create = messagebox.askyesno(
@@ -582,14 +582,14 @@ class App(tk.Tk):
 
     def _launch_run(self, export_dir, files=None, clear_log=False, silent=False):
         """Startet einen Hintergrund-Lauf. files=None verarbeitet den
-        gesamten Ordner (manueller Klick auf "Kontoauszuege erstellen");
+        gesamten Ordner (manueller Klick auf "Kontoauszüge erstellen");
         eine konkrete Liste verarbeitet nur diese (von der automatischen
-        Ueberwachung genutzt). silent=True unterdrueckt den abschliessenden
-        Popup-Dialog (der ist modal und wuerde die automatische
-        Ueberwachung blockieren, bis er weggeklickt wird) -- das Ergebnis
-        landet dann nur im Protokoll. Gibt False zurueck, wenn bereits ein
+        Überwachung genutzt). silent=True unterdrückt den abschließenden
+        Popup-Dialog (der ist modal und würde die automatische
+        Überwachung blockieren, bis er weggeklickt wird) -- das Ergebnis
+        landet dann nur im Protokoll. Gibt False zurück, wenn bereits ein
         Lauf aktiv ist (dann passiert nichts -- weder manuell noch
-        automatisch ueberlappen sich zwei Laeufe)."""
+        automatisch überlappen sich zwei Läufe)."""
         if self.worker_running:
             return False
 
@@ -662,21 +662,21 @@ class App(tk.Tk):
         self.progress.stop()
         self._refresh_csv_count()
         if silent:
-            # Automatischer Lauf (Ueberwachung): kein modaler Dialog, der
-            # den Hintergrundbetrieb blockieren wuerde -- nur ins Protokoll.
+            # Automatischer Lauf (Überwachung): kein modaler Dialog, der
+            # den Hintergrundbetrieb blockieren würde -- nur ins Protokoll.
             if errors:
-                self._append_log(f"Ueberwachung: {processed} verarbeitet, {errors} Fehler.")
+                self._append_log(f"Überwachung: {processed} verarbeitet, {errors} Fehler.")
             elif processed:
-                self._append_log(f"Ueberwachung: {processed} Kontoauszug/-zuege erstellt.")
+                self._append_log(f"Überwachung: {processed} Kontoauszug/-züge erstellt.")
             return
         if errors:
             messagebox.showwarning(
                 "Fertig mit Fehlern",
-                f"{processed} Kontoauszug/-zuege erstellt, {errors} Fehler.\n"
+                f"{processed} Kontoauszug/-züge erstellt, {errors} Fehler.\n"
                 "Details siehe Protokoll.",
             )
         elif processed:
-            messagebox.showinfo("Fertig", f"{processed} Kontoauszug/-zuege erfolgreich erstellt.")
+            messagebox.showinfo("Fertig", f"{processed} Kontoauszug/-züge erfolgreich erstellt.")
         else:
             messagebox.showinfo("Fertig", "Keine CSV-Dateien gefunden.")
 
