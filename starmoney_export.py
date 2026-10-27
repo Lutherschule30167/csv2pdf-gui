@@ -4,14 +4,14 @@
 StarMoney-CSV zu PDF-Kontoauszug -- Windows-Portierung
 =======================================================
 
-Reines Python-Aequivalent des urspruenglichen Linux-Bash-Skripts (urspruenglich
-fuer die Lutherschule Hannover entstanden, mittlerweile fuer beliebige Schulen/
-Einrichtungen konfigurierbar). Lauffaehig unter Windows (und weiterhin auch
+Reines Python-Äquivalent des ursprünglichen Linux-Bash-Skripts (ursprünglich
+für die Lutherschule Hannover entstanden, mittlerweile für beliebige Schulen/
+Einrichtungen konfigurierbar). Lauffähig unter Windows (und weiterhin auch
 unter Linux/macOS), ohne die externen Kommandozeilen-Tools des Originals
 (ghostscript, paps, ImageMagick, qpdf, iconv, column, curl, perl-rename).
 Die PDFs werden direkt mit reportlab erzeugt.
 
-Einzige externe Abhaengigkeit: reportlab
+Einzige externe Abhängigkeit: reportlab
     pip install reportlab
 
 Verwendung:
@@ -21,16 +21,16 @@ Verwendung:
 
 Ohne Pfadangabe wird der Ordner "export_auszuege" neben diesem Skript
 verwendet. Mit --delete-csv werden die Original-CSV-Dateien nach
-erfolgreicher Verarbeitung geloescht (so wie im Original-Bash-Skript);
-ohne dieses Flag bleiben sie erhalten (sichererer Standard fuer diese
+erfolgreicher Verarbeitung gelöscht (so wie im Original-Bash-Skript);
+ohne dieses Flag bleiben sie erhalten (sichererer Standard für diese
 neue Portierung).
 
 Logo und Kopf-Schriftart sind frei konfigurierbar (kein fest einprogrammiertes
 Schullogo mehr) - entweder je Aufruf per --logo/--header-font(-file), oder
 dauerhaft in config.json (siehe load_config()/save_config(), bzw. bequem
-ueber starmoney_gui.py).
+über starmoney_gui.py).
 
-Entstanden mit Unterstuetzung von Claude (Anthropic).
+Entstanden mit Unterstützung von Claude (Anthropic).
 Lizenz: MIT
 """
 
@@ -51,7 +51,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 # Zentrale Versionsnummer (wird auch von starmoney_gui.py angezeigt).
-# Bei Aenderung README, /docs und Wiki angleichen.
+# Bei Änderung README, /docs und Wiki angleichen.
 __version__ = "0.2.2"
 
 # ---------------------------------------------------------------------------
@@ -59,22 +59,22 @@ __version__ = "0.2.2"
 # ---------------------------------------------------------------------------
 DEFAULT_HINT_TEXT = ("Hinweis: Buchungen innerhalb eines Tages sind evtl. nicht "
                      "in der richtigen Reihenfolge gelistet.")
-# Harte Obergrenze fuer den frei editierbaren Hinweistext. Der Text steht
+# Harte Obergrenze für den frei editierbaren Hinweistext. Der Text steht
 # einzeilig (kein Umbruch) rechts neben dem Logo; bei Courier (der breitesten
-# der drei Standard-Kopfschriften) und 7pt Schriftgroesse passen im
-# verfuegbaren Platz konservativ gerechnet ca. 100-110 Zeichen ohne dass die
-# Zeile über den rechten Seitenrand hinauslaeuft -- 100 als rund und sicher
-# gewählte Grenze, unabhaengig davon welche Kopfschrift gewaehlt ist.
+# der drei Standard-Kopfschriften) und 7pt Schriftgröße passen im
+# verfügbaren Platz konservativ gerechnet ca. 100-110 Zeichen ohne dass die
+# Zeile über den rechten Seitenrand hinausläuft -- 100 als rund und sicher
+# gewählte Grenze, unabhängig davon welche Kopfschrift gewählt ist.
 HINT_TEXT_MAX_LENGTH = 100
 
 # Schriftart der Buchungstabelle selbst -- bewusst NICHT konfigurierbar,
-# da eine Monospace-Schrift fuer die Spaltenausrichtung noetig ist.
+# da eine Monospace-Schrift für die Spaltenausrichtung nötig ist.
 TABLE_FONT_NAME = "Courier"
 TABLE_FONT_NAME_BOLD = "Courier-Bold"
 FONT_SIZE = 7
 LINE_HEIGHT = FONT_SIZE * 1.15
 
-# Kopf-Schriftart (Kontoname/Datum/Hinweis) -- frei waehlbar, siehe
+# Kopf-Schriftart (Kontoname/Datum/Hinweis) -- frei wählbar, siehe
 # resolve_header_fonts(). Diese drei PDF-Standardschriften brauchen keine
 # externe Schriftdatei und funktionieren immer.
 STANDARD_HEADER_FONTS = {
@@ -84,35 +84,35 @@ STANDARD_HEADER_FONTS = {
 }
 DEFAULT_HEADER_FONT = "Helvetica"
 
-TOP_MARGIN_PAGE1 = 100   # Platz fuer Logo/Kontoname/Datum -- nur auf Seite 1
-# Zusaetzlicher Leerraum zwischen Kopfbereich und der eigentlichen
+TOP_MARGIN_PAGE1 = 100   # Platz für Logo/Kontoname/Datum -- nur auf Seite 1
+# Zusätzlicher Leerraum zwischen Kopfbereich und der eigentlichen
 # Buchungstabelle, in "Zeilen" der Tabelle selbst gemessen (siehe
-# LINE_HEIGHT oben), damit es bei anderer Schriftgroesse konsistent bleibt.
+# LINE_HEIGHT oben), damit es bei anderer Schriftgröße konsistent bleibt.
 HEADER_TABLE_GAP_LINES = 2
 TOP_MARGIN_OTHER = 36
 BOTTOM_MARGIN = 36
 SIDE_MARGIN = 28
 
-# Dunkles, gut lesbares Rot fuer negative Betraege -- bewusst kein grelles
+# Dunkles, gut lesbares Rot für negative Beträge -- bewusst kein grelles
 # Signalrot (255,0,0), das auf Papier/Bildschirm schnell unruhig wirkt.
 NEGATIVE_COLOR = colors.Color(0.70, 0, 0)
 
-# Fusszeile "Weiterfuehrende Dokumente" -- Standard-Hyperlink-Blau (aehnlich
-# dem in Office/Google Docs uebliche Linkfarbe), damit klar erkennbar ist,
+# Fußzeile "Weiterführende Dokumente" -- Standard-Hyperlink-Blau (ähnlich
+# dem in Office/Google Docs übliche Linkfarbe), damit klar erkennbar ist,
 # dass es sich um klickbare Links handelt.
 LINK_COLOR = colors.Color(0.067, 0.333, 0.8)
 FOOTER_LINE_HEIGHT = 12
-FOOTER_TOP_GAP = 14  # Abstand zwischen letzter Buchungszeile und Fusszeilenbereich
-# 2pt kleiner als die entsprechenden Kopfbereich-Groessen (Titel vs. Konto-
-# name-Zeile 9pt dort waere 11pt, Linktext vs. "Kontoauszug vom..."/Summary
-# waere 8pt dort) -- der Fussbereich soll sich optisch dezent unterordnen.
+FOOTER_TOP_GAP = 14  # Abstand zwischen letzter Buchungszeile und Fußzeilenbereich
+# 2pt kleiner als die entsprechenden Kopfbereich-Größen (Titel vs. Konto-
+# name-Zeile 9pt dort wäre 11pt, Linktext vs. "Kontoauszug vom..."/Summary
+# wäre 8pt dort) -- der Fußbereich soll sich optisch dezent unterordnen.
 FOOTER_TITLE_SIZE = 7
 FOOTER_LINK_SIZE = 6
 
-# Hinweis "Made with <Herz> and csv2pdf-gui" ganz unten rechtsbuendig auf
+# Hinweis "Made with <Herz> and csv2pdf-gui" ganz unten rechtsbündig auf
 # jeder Seite; "csv2pdf-gui" ist ein Link zur Projekthomepage. Das Herz wird
 # als Vektorgrafik gezeichnet statt als Schriftzeichen -- die PDF-
-# Standardschriften enthalten kein U+2764, und so muss keine zusaetzliche
+# Standardschriften enthalten kein U+2764, und so muss keine zusätzliche
 # Schriftdatei mitgeliefert werden (funktioniert auch in der Windows-EXE).
 PROJECT_HOMEPAGE = "https://lutherschule30167.github.io/csv2pdf-gui/"
 CREDIT_SIZE = 6
@@ -120,12 +120,12 @@ CREDIT_Y = 18  # Grundlinie, unterhalb von BOTTOM_MARGIN
 CREDIT_COLOR = colors.Color(0.45, 0.45, 0.45)
 CREDIT_ACCENT_COLOR = colors.HexColor("#d60b52")  # Herz und Link
 
-# Maximale Logo-Groesse im Kopfbereich. Entspricht exakt der Box, auf die
+# Maximale Logo-Größe im Kopfbereich. Entspricht exakt der Box, auf die
 # das Original-Bash-Skript das feste Lutherschullogo per ImageMagick
-# begrenzt hat ("convert -resize 156x120" auf einer 2x-aufgeloesten
-# Kopfseite -> 156/2=78pt breit, 120/2=60pt hoch). Ein frei gewaehltes
-# eigenes Logo wird proportional in dieselbe Box eingepasst (nie groesser),
-# damit der Kopfbereich unabhaengig vom gewaehlten Logo gleich aussieht.
+# begrenzt hat ("convert -resize 156x120" auf einer 2x-aufgelösten
+# Kopfseite -> 156/2=78pt breit, 120/2=60pt hoch). Ein frei gewähltes
+# eigenes Logo wird proportional in dieselbe Box eingepasst (nie größer),
+# damit der Kopfbereich unabhängig vom gewählten Logo gleich aussieht.
 LOGO_MAX_WIDTH = 78.0
 LOGO_MAX_HEIGHT = 60.0
 
@@ -135,8 +135,8 @@ RIGHT_ALIGN_COLUMNS = {3, 4}           # entspricht "-R 3,4"
 TRUNCATE_COLUMNS = {5}                 # entspricht "-T 5"
 SEPARATOR = "||"                       # entspricht "column -o '||'"
 # Nach diesen Spalten (Buchungstag/Begünstigter/Betrag/Saldo) wird die
-# linke Haelfte des "||"-Trenners durch ein Leerzeichen ersetzt (" |"
-# statt "||") -- rein optisch, aendert nichts an der Spaltenbreite/
+# linke Hälfte des "||"-Trenners durch ein Leerzeichen ersetzt (" |"
+# statt "||") -- rein optisch, ändert nichts an der Spaltenbreite/
 # Ausrichtung. Trenner nach weiteren, hier nicht genannten Spalten
 # (z.B. nach Verwendungszweck, falls noch mehr Spalten folgen) bleiben "||".
 LEFT_SPACE_AFTER_COLUMNS = {1, 2, 3, 4}
@@ -153,11 +153,11 @@ DEFAULT_CONFIG = {
     "header_font": DEFAULT_HEADER_FONT,
     "header_font_path": "",
     "hint_text": DEFAULT_HINT_TEXT,
-    # Liste von {"name": ..., "url": ...} fuer den Fussbereich
-    # "Weiterfuehrende Dokumente" (siehe draw_footer_links()).
+    # Liste von {"name": ..., "url": ...} für den Fußbereich
+    # "Weiterführende Dokumente" (siehe draw_footer_links()).
     "footer_links": [],
-    # Intervall (Sekunden) fuer die optionale automatische Ordnerueberwachung
-    # in der GUI (siehe starmoney_gui.py) bzw. Standardwert fuer --watch.
+    # Intervall (Sekunden) für die optionale automatische Ordnerüberwachung
+    # in der GUI (siehe starmoney_gui.py) bzw. Standardwert für --watch.
     "watch_interval_seconds": 30,
 }
 
@@ -165,14 +165,14 @@ DEFAULT_CONFIG = {
 def app_dir():
     """Ordner, in dem config.json und export_auszuege liegen: neben dem
     Skript, bzw. bei der mit PyInstaller gebauten .exe neben der .exe
-    (__file__ zeigt dort in einen temporaeren Entpackordner)."""
+    (__file__ zeigt dort in einen temporären Entpackordner)."""
     if getattr(sys, "frozen", False):
         return os.path.dirname(os.path.abspath(sys.executable))
     return os.path.dirname(os.path.abspath(__file__))
 
 
 def user_config_path():
-    """Ausweich-Speicherort fuer config.json, falls der Programmordner nicht
+    """Ausweich-Speicherort für config.json, falls der Programmordner nicht
     beschreibbar ist (z.B. EXE unter C:\\Program Files): %APPDATA%\\csv2pdf
     unter Windows, sonst ~/.config/csv2pdf."""
     base = os.environ.get("APPDATA") or os.path.join(os.path.expanduser("~"), ".config")
@@ -180,8 +180,8 @@ def user_config_path():
 
 
 def config_path():
-    """config.json neben Skript/EXE - ausser es existiert bereits eine im
-    Ausweichordner (wurde angelegt, weil der Programmordner schreibgeschuetzt
+    """config.json neben Skript/EXE - außer es existiert bereits eine im
+    Ausweichordner (wurde angelegt, weil der Programmordner schreibgeschützt
     war); dann gilt diese."""
     fallback = user_config_path()
     if os.path.isfile(fallback):
@@ -191,7 +191,7 @@ def config_path():
 
 def load_config():
     """Liest config.json (siehe config_path()). Fehlt die Datei oder ist sie
-    beschaedigt, werden einfach die Standardwerte zurueckgegeben."""
+    beschädigt, werden einfach die Standardwerte zurückgegeben."""
     cfg = dict(DEFAULT_CONFIG)
     try:
         with open(config_path(), "r", encoding="utf-8") as fh:
@@ -206,14 +206,14 @@ def load_config():
 
 
 def save_config(updates):
-    """Schreibt die uebergebenen Schluessel dauerhaft in config.json,
-    bestehende (nicht uebergebene) Werte bleiben erhalten."""
+    """Schreibt die übergebenen Schlüssel dauerhaft in config.json,
+    bestehende (nicht übergebene) Werte bleiben erhalten."""
     merged = load_config()
     merged.update({k: v for k, v in updates.items() if k in DEFAULT_CONFIG})
     try:
         _write_config(config_path(), merged)
     except OSError:
-        # Programmordner schreibgeschuetzt -> in den Ausweichordner speichern;
+        # Programmordner schreibgeschützt -> in den Ausweichordner speichern;
         # ab dann liest load_config() automatisch von dort.
         fallback = user_config_path()
         os.makedirs(os.path.dirname(fallback), exist_ok=True)
@@ -237,7 +237,7 @@ def read_csv_text(path):
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
-        # Original: einzelne im erkannten Encoding ungueltige Bytes verwerfen,
+        # Original: einzelne im erkannten Encoding ungültige Bytes verwerfen,
         # statt die ganze Datei zu verlieren.
         text = raw.decode("windows-1252", errors="ignore")
     return text.replace("\r\n", "\n").replace("\r", "\n")
@@ -258,24 +258,24 @@ def format_amount_de(value):
     """Formatiert eine Zahl im deutschen Format (Tausenderpunkt,
     Dezimalkomma), z.B. -1234.5 -> "-1.234,50"."""
     sign = "-" if value < 0 else ""
-    s = f"{abs(value):,.2f}"          # zunaechst "1,234.50" (en-US-Zwischenschritt)
+    s = f"{abs(value):,.2f}"          # zunächst "1,234.50" (en-US-Zwischenschritt)
     s = s.replace(",", "\0").replace(".", ",").replace("\0", ".")
     return sign + s
 
 
 def compute_summary(body_lines):
     """Berechnet aus den Datenzeilen:
-    - soll: Summe aller negativen Betraege (Spalte 3)
-    - haben: Summe aller positiven Betraege (Spalte 3)
+    - soll: Summe aller negativen Beträge (Spalte 3)
+    - haben: Summe aller positiven Beträge (Spalte 3)
     - gesamtsaldo: schlicht soll + haben (Netto aus allen Buchungen dieser
       Datei).
 
     Bewusst NICHT der Saldo-Wert (Spalte 4) irgendeiner einzelnen Zeile:
-    die Saldo-Spalte enthaelt einen bereits vor dem Exportzeitraum
+    die Saldo-Spalte enthält einen bereits vor dem Exportzeitraum
     bestehenden Kontostand, den Soll/Haben gar nicht kennen -- ein Vergleich
-    mit einer einzelnen Saldo-Zeile fuehrt daher zu einem falschen,
-    unzusammenhaengenden Wert (z.B. Soll -624,00 / Haben 624,00, aber
-    Gesamtsaldo faelschlich -8,00 aus einer beliebigen Saldo-Zelle statt
+    mit einer einzelnen Saldo-Zeile führt daher zu einem falschen,
+    unzusammenhängenden Wert (z.B. Soll -624,00 / Haben 624,00, aber
+    Gesamtsaldo fälschlich -8,00 aus einer beliebigen Saldo-Zelle statt
     korrekt 0,00)."""
     soll = 0.0
     haben = 0.0
@@ -297,11 +297,11 @@ DATE_RE = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{2,4})")
 
 
 def normalize_date_field(field):
-    """Ergaenzt Tag/Monat in einem Datum (z.B. "1.3.2024") um eine
-    fuehrende Null ("01.03.2024"). Funktioniert auch bei Anfuehrungszeichen
+    """Ergänzt Tag/Monat in einem Datum (z.B. "1.3.2024") um eine
+    führende Null ("01.03.2024"). Funktioniert auch bei Anführungszeichen
     um den Wert, da nur nach dem Zahlenmuster gesucht wird. Das Jahr bleibt
-    unveraendert. Ohne erkennbares Datumsmuster wird das Feld unveraendert
-    zurueckgegeben."""
+    unverändert. Ohne erkennbares Datumsmuster wird das Feld unverändert
+    zurückgegeben."""
     def repl(m):
         day, month, year = m.group(1), m.group(2), m.group(3)
         return f"{int(day):02d}.{int(month):02d}.{year}"
@@ -337,14 +337,14 @@ def group_and_sort(lines):
             close_group()
             groups.append([line])
             continue
-        # Anfuehrungszeichen in Datenzeilen durch ein Leerzeichen ersetzen
+        # Anführungszeichen in Datenzeilen durch ein Leerzeichen ersetzen
         # (nur hier, nicht in der Kopfzeile -- die wird in format_table()
-        # separat behandelt und ihre Anfuehrungszeichen komplett entfernt,
+        # separat behandelt und ihre Anführungszeichen komplett entfernt,
         # nicht durch ein Leerzeichen ersetzt).
         line = line.replace('"', " ")
         fields = line.split(";")
         if fields:
-            # Datum vor der Gruppierung normalisieren (fuehrende Null),
+            # Datum vor der Gruppierung normalisieren (führende Null),
             # damit "1.3.2024" und "01.03.2024" auch als derselbe Tag
             # erkannt werden und die Anzeige einheitlich ist.
             fields[0] = normalize_date_field(fields[0])
@@ -378,9 +378,9 @@ def apply_fixed_widths(fields):
 
 
 def format_table(lines):
-    """Gibt pro Zeile eine Liste von (Text, ist_negativ)-Segmenten zurueck
+    """Gibt pro Zeile eine Liste von (Text, ist_negativ)-Segmenten zurück
     (Zellen und Trenner abwechselnd), statt eines fertigen Strings -- so
-    kann make_pdf() negative Betraege/Salden gezielt rot einfaerben, ohne
+    kann make_pdf() negative Beträge/Salden gezielt rot einfärben, ohne
     die Monospace-Ausrichtung zu verlieren (Trenner sind immer schwarz)."""
     if not lines:
         return []
@@ -401,7 +401,7 @@ def format_table(lines):
 
     # Welche Zellen (Spalte 3 = Betrag, Spalte 4 = Saldo) sind negativ --
     # anhand der ORIGINALEN (ungepaddeten) Werte ermittelt, quotes-robust
-    # ueber to_number().
+    # über to_number().
     neg_flags_per_row = []
     for row in data_field_rows:
         flags = set()
@@ -478,7 +478,7 @@ def parse_account_and_date(final_stem):
 # Logo (lokale Bilddatei, frei konfigurierbar -- kein fester Download mehr)
 # ---------------------------------------------------------------------------
 def resolve_logo(logo_path, log_err=None):
-    """Prueft eine vom Anwender konfigurierte Logo-Bilddatei. Leer/None
+    """Prüft eine vom Anwender konfigurierte Logo-Bilddatei. Leer/None
     bedeutet bewusst "kein Logo" (kein Standardlogo mehr eingebaut)."""
     log_err = log_err or (lambda m: print(m, file=sys.stderr))
     if not logo_path:
@@ -487,7 +487,7 @@ def resolve_logo(logo_path, log_err=None):
         log_err(f"Warnung: Logo-Datei nicht gefunden: {logo_path} - Kopfseite ohne Logo.")
         return None
     try:
-        ImageReader(logo_path)  # frueh pruefen, ob reportlab die Datei lesen kann
+        ImageReader(logo_path)  # früh prüfen, ob reportlab die Datei lesen kann
     except Exception as exc:
         log_err(f"Warnung: Logo-Datei konnte nicht gelesen werden ({exc}) - Kopfseite ohne Logo.")
         return None
@@ -495,21 +495,21 @@ def resolve_logo(logo_path, log_err=None):
 
 
 # ---------------------------------------------------------------------------
-# Kopf-Schriftart (frei waehlbar: PDF-Standardschrift oder eigene .ttf/.otf)
+# Kopf-Schriftart (frei wählbar: PDF-Standardschrift oder eigene .ttf/.otf)
 # ---------------------------------------------------------------------------
 _registered_fonts = {}  # Cache: Dateipfad -> registrierter Fontname
 
 
 def resolve_header_fonts(header_font, header_font_path, log_err=None):
-    """Liefert (normale_schrift, fette_schrift) fuer den Kopfbereich.
+    """Liefert (normale_schrift, fette_schrift) für den Kopfbereich.
 
     - Wenn header_font_path gesetzt ist, wird diese .ttf/.otf-Datei geladen
-      und fuer normalen UND fetten Text verwendet (eine echte Fettvariante
+      und für normalen UND fetten Text verwendet (eine echte Fettvariante
       gibt es nur bei den drei PDF-Standardschriften unten).
     - Sonst wird header_font als Name einer PDF-Standardschrift erwartet
       (Helvetica, Times-Roman, Courier).
     - Bei Fehlern (Datei fehlt, unbekannter Name, ...) wird auf Helvetica
-      zurueckgefallen und eine Warnung geloggt."""
+      zurückgefallen und eine Warnung geloggt."""
     log_err = log_err or (lambda m: print(m, file=sys.stderr))
 
     if header_font_path:
@@ -538,8 +538,8 @@ def resolve_header_fonts(header_font, header_font_path, log_err=None):
 
 
 # ---------------------------------------------------------------------------
-# PDF-Erzeugung (ersetzt paps+ghostscript fuer den Text und
-# ImageMagick+qpdf fuer die untergelegte Kopfseite -- hier direkt in
+# PDF-Erzeugung (ersetzt paps+ghostscript für den Text und
+# ImageMagick+qpdf für die untergelegte Kopfseite -- hier direkt in
 # einem Durchgang mit reportlab statt zweier separat verschmolzener PDFs)
 # ---------------------------------------------------------------------------
 def draw_bold_text(c, x, y, text, font_normal, font_bold, size):
@@ -547,8 +547,8 @@ def draw_bold_text(c, x, y, text, font_normal, font_bold, size):
     echte Fettvariante (font_bold != font_normal), die einfach verwendet
     wird. Bei einer eigenen .ttf/.otf-Datei ohne separate Fettvariante
     (siehe resolve_header_fonts: dort ist font_bold == font_normal) wird
-    stattdessen ein "Fake Bold" gezeichnet -- Buchstaben werden gefuellt
-    UND konturiert, was optisch fetter wirkt als reines Fuellen."""
+    stattdessen ein "Fake Bold" gezeichnet -- Buchstaben werden gefüllt
+    UND konturiert, was optisch fetter wirkt als reines Füllen."""
     if font_bold != font_normal:
         c.setFont(font_bold, size)
         c.drawString(x, y, text)
@@ -559,7 +559,7 @@ def draw_bold_text(c, x, y, text, font_normal, font_bold, size):
     t.setFont(font_normal, size)
     t.setFillColor(colors.black)
     t.setStrokeColor(colors.black)
-    t.setTextRenderMode(2)  # 2 = Fuellen + Konturieren
+    t.setTextRenderMode(2)  # 2 = Füllen + Konturieren
     t.textOut(text)
     c.drawText(t)
     c.restoreState()
@@ -572,8 +572,8 @@ def draw_colored_segments(c, x, y, segments, font_normal, size, font_bold=None):
     markierte Segmente nutzen font_bold (falls angegeben); hat die
     Kopfschrift keine echte Fettvariante (font_bold == font_normal, siehe
     resolve_header_fonts bei eigenen .ttf-Dateien), wird stattdessen wie
-    bei draw_bold_text ein Fake-Bold (Fuellen + Konturieren) gezeichnet.
-    Ein einzelnes Textobjekt haelt dabei die Cursor-Position ueber alle
+    bei draw_bold_text ein Fake-Bold (Füllen + Konturieren) gezeichnet.
+    Ein einzelnes Textobjekt hält dabei die Cursor-Position über alle
     Segmente hinweg konsistent, die Spaltenausrichtung geht nicht verloren."""
     c.saveState()
     c.setLineWidth(size * 0.03)
@@ -591,16 +591,16 @@ def draw_colored_segments(c, x, y, segments, font_normal, size, font_bold=None):
         t.setFillColor(color)
         if use_fake_bold:
             t.setStrokeColor(color)
-            t.setTextRenderMode(2)  # Fuellen + Konturieren
+            t.setTextRenderMode(2)  # Füllen + Konturieren
         else:
-            t.setTextRenderMode(0)  # nur Fuellen
+            t.setTextRenderMode(0)  # nur Füllen
         t.textOut(text)
     c.drawText(t)
     c.restoreState()
 
 
 def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
-    """Zeichnet den Fussbereich "Weiterfuehrende Dokumente" mit anklickbaren
+    """Zeichnet den Fußbereich "Weiterführende Dokumente" mit anklickbaren
     Hyperlinks DIREKT IM ANSCHLUSS an die letzte Buchungszeile (nicht am
     unteren Seitenrand verankert). Passt der GESAMTE Block nicht mehr auf
     die aktuelle Seite, wird er als Ganzes -- nicht zeilenweise aufgeteilt
@@ -611,8 +611,8 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
     nicht leer). Der Linktext (name) erscheint sichtbar, die URL selbst
     nicht -- sie steckt nur als Klickziel hinter dem Text.
 
-    Gibt die y-Position zurueck, an der der Fussbereich endet (aktuell
-    ungenutzt, da der Fussbereich das letzte Element auf der Seite ist)."""
+    Gibt die y-Position zurück, an der der Fußbereich endet (aktuell
+    ungenutzt, da der Fußbereich das letzte Element auf der Seite ist)."""
     if not links:
         return y
 
@@ -627,20 +627,20 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
 
     fy = y - FOOTER_TOP_GAP
 
-    # Duenne Trennlinie oberhalb des Fussbereichs zur optischen Abgrenzung
+    # Dünne Trennlinie oberhalb des Fußbereichs zur optischen Abgrenzung
     # von der Buchungstabelle.
     c.setStrokeColor(colors.Color(0.6, 0.6, 0.6))
     c.setLineWidth(0.5)
     c.line(SIDE_MARGIN, fy + FOOTER_LINE_HEIGHT - 2, width - SIDE_MARGIN, fy + FOOTER_LINE_HEIGHT - 2)
 
-    draw_bold_text(c, SIDE_MARGIN, fy, "Weiterfuehrende Dokumente", font_normal, font_bold, FOOTER_TITLE_SIZE)
+    draw_bold_text(c, SIDE_MARGIN, fy, "Weiterführende Dokumente", font_normal, font_bold, FOOTER_TITLE_SIZE)
     fy -= FOOTER_LINE_HEIGHT
 
     for name, url in links:
         if fy < BOTTOM_MARGIN:
-            # Sicherheitsnetz fuer den (unrealistischen) Fall, dass so
+            # Sicherheitsnetz für den (unrealistischen) Fall, dass so
             # viele Links konfiguriert sind, dass selbst eine leere Seite
-            # nicht reicht -- dann lieber sauber weiterlaufen als ueber
+            # nicht reicht -- dann lieber sauber weiterlaufen als über
             # den Rand zu zeichnen.
             c.showPage()
             fy = height - TOP_MARGIN_OTHER
@@ -648,7 +648,7 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
         c.setFillColor(LINK_COLOR)
         c.drawString(SIDE_MARGIN, fy, name)
         w = c.stringWidth(name, font_normal, FOOTER_LINK_SIZE)
-        # Unsichtbare Klickflaeche ueber dem Linktext -- die URL selbst
+        # Unsichtbare Klickfläche über dem Linktext -- die URL selbst
         # wird nirgends als Text ausgegeben, nur als Klickziel hinterlegt.
         c.linkURL(url, (SIDE_MARGIN, fy - 2, SIDE_MARGIN + w, fy + 8), relative=0)
         c.setStrokeColor(LINK_COLOR)
@@ -661,7 +661,7 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
 
 
 def draw_heart(c, x, y, size):
-    """Zeichnet ein gefuelltes Herz, dessen linke untere Ecke der
+    """Zeichnet ein gefülltes Herz, dessen linke untere Ecke der
     umgebenden Box (size x size) bei (x, y) liegt."""
     s = size
     p = c.beginPath()
@@ -677,7 +677,7 @@ def draw_heart(c, x, y, size):
 
 
 def draw_credit(c, width, font):
-    """Zeichnet "Made with <Herz> and csv2pdf-gui" rechtsbuendig an den
+    """Zeichnet "Made with <Herz> and csv2pdf-gui" rechtsbündig an den
     unteren Seitenrand; "csv2pdf-gui" ist ein Link zur Projekthomepage."""
     size = CREDIT_SIZE
     heart = size * 0.85
@@ -729,9 +729,9 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
     width, height = A4
 
     # -- Kopfbereich nur auf Seite 1 --
-    # Feste Textspalte, unabhaengig von der tatsaechlichen Logobreite (wie im
+    # Feste Textspalte, unabhängig von der tatsächlichen Logobreite (wie im
     # Original: dort war die Textposition ebenfalls fix, da die Logo-Box eine
-    # feste Groesse hatte). So bleibt der Kopfbereich immer gleich ausgerichtet,
+    # feste Größe hatte). So bleibt der Kopfbereich immer gleich ausgerichtet,
     # egal welches Logo (oder gar keins) eingestellt ist.
     text_x = SIDE_MARGIN + LOGO_MAX_WIDTH + 15
     if logo_path:
@@ -739,10 +739,10 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
             img = ImageReader(logo_path)
             iw, ih = img.getSize()
             # In die feste Box (LOGO_MAX_WIDTH x LOGO_MAX_HEIGHT) einpassen,
-            # Seitenverhaeltnis erhalten -- das Logo wird also nie groesser
+            # Seitenverhältnis erhalten -- das Logo wird also nie größer
             # dargestellt als das bisherige Lutherschullogo. min(..., 1.0):
             # kleinere Logos werden nur verkleinert, nie hochskaliert (das
-            # wuerde bei kleinen Bildern nur zu Pixelbrei fuehren).
+            # würde bei kleinen Bildern nur zu Pixelbrei führen).
             scale = min(LOGO_MAX_WIDTH / iw, LOGO_MAX_HEIGHT / ih, 1.0)
             w, h = iw * scale, ih * scale
             top_y = height - 30
@@ -752,7 +752,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
             print(f"Warnung: Logo konnte nicht eingebettet werden ({exc}).", file=sys.stderr)
 
     # Defensiv nochmal kappen (nicht nur beim Speichern in der GUI/CLI
-    # pruefen), falls config.json von Hand bearbeitet wurde.
+    # prüfen), falls config.json von Hand bearbeitet wurde.
     hint_text = (hint_text or "").replace('"', " ")[:HINT_TEXT_MAX_LENGTH]
 
     draw_bold_text(c, text_x, height - 45, account, header_font_normal, header_font_bold, 11)
@@ -760,7 +760,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
     c.drawString(text_x, height - 60, f"Kontoauszug vom {datum}, {run_time} Uhr")
 
     # Gesamtsaldo/Soll/Haben -- direkt unter "Kontoauszug vom..." ohne
-    # Leerzeile. Negative Betraege (typischerweise Soll, ggf. auch ein im
+    # Leerzeile. Negative Beträge (typischerweise Soll, ggf. auch ein im
     # Minus stehender Gesamtsaldo) in Rot.
     summary_segments = [
         ("Gesamtsaldo: ", False),
@@ -776,7 +776,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
     c.drawString(text_x, height - 87, hint_text)
 
     # -- Buchungszeilen (immer Monospace, siehe TABLE_FONT_NAME oben) --
-    # Zusaetzlicher Abstand zum Kopfbereich (siehe HEADER_TABLE_GAP_LINES).
+    # Zusätzlicher Abstand zum Kopfbereich (siehe HEADER_TABLE_GAP_LINES).
     y = height - TOP_MARGIN_PAGE1 - HEADER_TABLE_GAP_LINES * LINE_HEIGHT
     for i, segments in enumerate(formatted_lines):
         if y < BOTTOM_MARGIN:
@@ -807,7 +807,7 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
     while lines and lines[-1] == "":
         lines.pop()
     if not lines:
-        log(f"Leere Datei uebersprungen: {os.path.basename(path)}")
+        log(f"Leere Datei übersprungen: {os.path.basename(path)}")
         return
 
     ordered = group_and_sort(lines)
@@ -818,9 +818,9 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
     final_stem = shorten_stem(stem)
     account, datum = parse_account_and_date(final_stem)
     # Kontoname stammt aus dem Dateinamen, nicht aus dem CSV-Inhalt -- daher
-    # hier defensiv saeubern, falls ein Anfuehrungszeichen im Dateinamen
-    # steckt (auf Windows ohnehin unzulaessig, auf Linux/macOS theoretisch
-    # moeglich).
+    # hier defensiv säubern, falls ein Anführungszeichen im Dateinamen
+    # steckt (auf Windows ohnehin unzulässig, auf Linux/macOS theoretisch
+    # möglich).
     account = account.replace('"', " ")
 
     out_pdf = os.path.join(export_dir, final_stem + ".pdf")
@@ -842,21 +842,21 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
     damit beide exakt dieselbe Logik verwenden.
 
     files: wenn None (Normalfall), werden ALLE *.csv in export_dir
-    verarbeitet. Wird eine Liste konkreter Pfade uebergeben, werden NUR
-    diese verarbeitet -- das nutzt der Ueberwachungsmodus (--watch bzw.
-    die GUI-Ordnerueberwachung), um gezielt nur neu aufgetauchte Dateien
-    zu verarbeiten statt bei jeder Pruefung alle CSVs erneut.
+    verarbeitet. Wird eine Liste konkreter Pfade übergeben, werden NUR
+    diese verarbeitet -- das nutzt der Überwachungsmodus (--watch bzw.
+    die GUI-Ordnerüberwachung), um gezielt nur neu aufgetauchte Dateien
+    zu verarbeiten statt bei jeder Prüfung alle CSVs erneut.
 
     logo_path / header_font / header_font_path / hint_text: wenn None, wird
     der jeweilige Wert aus config.json gelesen (siehe load_config()).
-    Explizite Werte (auch "" fuer "kein Logo") ueberschreiben die
-    Konfiguration nur fuer diesen Aufruf, ohne sie zu veraendern.
+    Explizite Werte (auch "" für "kein Logo") überschreiben die
+    Konfiguration nur für diesen Aufruf, ohne sie zu verändern.
 
     log / log_err: Callables, die jeweils eine Textzeile entgegennehmen.
-    Standardmaessig gehen normale Meldungen nach stdout, Warnungen/Fehler
+    Standardmäßig gehen normale Meldungen nach stdout, Warnungen/Fehler
     nach stderr (wie beim reinen Kommandozeilenaufruf).
 
-    Gibt (anzahl_verarbeitet, anzahl_fehler) zurueck. Wirft
+    Gibt (anzahl_verarbeitet, anzahl_fehler) zurück. Wirft
     FileNotFoundError, wenn export_dir nicht existiert.
     """
     log = log or (lambda m: print(m))
@@ -872,7 +872,7 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
     effective_hint = cfg.get("hint_text", DEFAULT_HINT_TEXT) if hint_text is None else hint_text
     effective_hint = (effective_hint or "")[:HINT_TEXT_MAX_LENGTH]
     raw_links = cfg.get("footer_links", []) if footer_links is None else footer_links
-    # Nur vollstaendige Eintraege (Name UND Link gesetzt) landen im PDF.
+    # Nur vollständige Einträge (Name UND Link gesetzt) landen im PDF.
     effective_links = [
         (entry.get("name", "").strip(), entry.get("url", "").strip())
         for entry in (raw_links or [])
@@ -907,27 +907,27 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
     if errors:
         log_err(f"Fertig mit {errors} Fehler(n).")
     else:
-        log("Alle Kontoauszuege erfolgreich erstellt.")
+        log("Alle Kontoauszüge erfolgreich erstellt.")
     return processed, errors
 
 
 def parse_args():
     p = argparse.ArgumentParser(
-        description="StarMoney-CSV-Exporte zu PDF-Kontoauszuegen verarbeiten "
+        description="StarMoney-CSV-Exporte zu PDF-Kontoauszügen verarbeiten "
                      "(Windows-Portierung des Original-Bash-Skripts).")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     p.add_argument("verzeichnis", nargs="?", default=None,
                     help="Exportverzeichnis (Standard: 'export_auszuege' neben diesem Skript)")
     p.add_argument("--delete-csv", action="store_true",
-                    help="Original-CSV nach erfolgreicher Verarbeitung loeschen "
+                    help="Original-CSV nach erfolgreicher Verarbeitung löschen "
                          "(Verhalten des Original-Bash-Skripts; Standard hier: nein)")
     p.add_argument("--logo", default=None,
-                    help="Pfad zu einer Logo-Bilddatei fuer den Kopfbereich "
+                    help="Pfad zu einer Logo-Bilddatei für den Kopfbereich "
                          "(leer lassen/weglassen = gespeicherte Einstellung bzw. kein Logo)")
     p.add_argument("--header-font", default=None, choices=list(STANDARD_HEADER_FONTS),
-                    help="PDF-Standardschrift fuer den Kopfbereich (Kontoname/Datum/Hinweis)")
+                    help="PDF-Standardschrift für den Kopfbereich (Kontoname/Datum/Hinweis)")
     p.add_argument("--header-font-file", default=None,
-                    help="Pfad zu einer eigenen .ttf/.otf-Schriftdatei fuer den Kopfbereich "
+                    help="Pfad zu einer eigenen .ttf/.otf-Schriftdatei für den Kopfbereich "
                          "(hat Vorrang vor --header-font)")
     p.add_argument("--hint-text", default=None, type=_hint_text_arg,
                     help=f"Hinweistext im Kopfbereich (max. {HINT_TEXT_MAX_LENGTH} Zeichen)")
@@ -936,8 +936,8 @@ def parse_args():
                          "als Standard in config.json speichern")
     p.add_argument("--watch", nargs="?", const=30, default=None, type=int, metavar="SEKUNDEN",
                     help="Nicht nur einmal verarbeiten, sondern das Verzeichnis dauerhaft alle "
-                         "SEKUNDEN (Standard: 30) auf neue CSV-Dateien pruefen. Laeuft bis "
-                         "Strg+C. Bereits verarbeitete Dateien werden bei folgenden Pruefungen "
+                         "SEKUNDEN (Standard: 30) auf neue CSV-Dateien prüfen. Läuft bis "
+                         "Strg+C. Bereits verarbeitete Dateien werden bei folgenden Prüfungen "
                          "nicht erneut angefasst.")
     return p.parse_args()
 
@@ -945,28 +945,28 @@ def parse_args():
 def _hint_text_arg(value):
     if len(value) > HINT_TEXT_MAX_LENGTH:
         raise argparse.ArgumentTypeError(
-            f"--hint-text darf hoechstens {HINT_TEXT_MAX_LENGTH} Zeichen lang sein "
-            f"({len(value)} Zeichen uebergeben).")
+            f"--hint-text darf höchstens {HINT_TEXT_MAX_LENGTH} Zeichen lang sein "
+            f"({len(value)} Zeichen übergeben).")
     return value
 
 
 def watch_loop(export_dir, interval_seconds, run_export_kwargs, log=None, log_err=None,
                 sleep_func=None, stop_check=None):
-    """Prueft export_dir alle interval_seconds Sekunden auf neue CSV-Dateien
+    """Prüft export_dir alle interval_seconds Sekunden auf neue CSV-Dateien
     und verarbeitet nur diese (nicht die gesamte bereits bekannte Menge
-    erneut). Laeuft endlos, bis KeyboardInterrupt (Strg+C) oder -- falls
-    angegeben -- stop_check() True zurueckgibt (fuer die GUI, die diese
-    Funktion nicht direkt nutzt, aber dieselbe Kernlogik ueber
+    erneut). Läuft endlos, bis KeyboardInterrupt (Strg+C) oder -- falls
+    angegeben -- stop_check() True zurückgibt (für die GUI, die diese
+    Funktion nicht direkt nutzt, aber dieselbe Kernlogik über
     find_new_csv_files() nachbildet).
 
-    sleep_func: austauschbar fuer Tests (Standard: time.sleep).
-    Gibt nie regulaer zurueck (Endlosschleife), ausser stop_check greift."""
+    sleep_func: austauschbar für Tests (Standard: time.sleep).
+    Gibt nie regulär zurück (Endlosschleife), außer stop_check greift."""
     log = log or (lambda m: print(m))
     log_err = log_err or (lambda m: print(m, file=sys.stderr))
     sleep_func = sleep_func or time.sleep
 
     known = set(glob.glob(os.path.join(export_dir, "*.csv")))
-    log(f"Ueberwachung gestartet: {export_dir} (Pruefung alle {interval_seconds}s, "
+    log(f"Überwachung gestartet: {export_dir} (Prüfung alle {interval_seconds}s, "
         f"Strg+C zum Beenden). {len(known)} vorhandene CSV-Datei(en) werden jetzt verarbeitet.")
     if known:
         run_export(export_dir, files=sorted(known), log=log, log_err=log_err, **run_export_kwargs)
@@ -983,9 +983,9 @@ def watch_loop(export_dir, interval_seconds, run_export_kwargs, log=None, log_er
             log(f"{len(new_files)} neue CSV-Datei(en) gefunden.")
             run_export(export_dir, files=sorted(new_files), log=log, log_err=log_err,
                        **run_export_kwargs)
-        # Unabhaengig vom Ergebnis als "gesehen" merken -- verhindert
+        # Unabhängig vom Ergebnis als "gesehen" merken -- verhindert
         # endloses erneutes Verarbeiten, auch wenn delete_csv aus ist oder
-        # eine Datei nicht geloescht werden konnte.
+        # eine Datei nicht gelöscht werden konnte.
         known |= current
 
 
@@ -1018,7 +1018,7 @@ def main():
         try:
             watch_loop(export_dir, args.watch, run_export_kwargs)
         except KeyboardInterrupt:
-            print("\nUeberwachung beendet.")
+            print("\nÜberwachung beendet.")
         return
 
     try:
