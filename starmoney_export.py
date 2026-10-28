@@ -52,7 +52,7 @@ from reportlab.lib.utils import ImageReader
 
 # Zentrale Versionsnummer (wird auch von starmoney_gui.py angezeigt).
 # Bei Änderung README, /docs und Wiki angleichen.
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 # ---------------------------------------------------------------------------
 # Konfiguration
@@ -66,6 +66,7 @@ DEFAULT_HINT_TEXT = ("Hinweis: Buchungen innerhalb eines Tages sind evtl. nicht 
 # Zeile über den rechten Seitenrand hinausläuft -- 100 als rund und sicher
 # gewählte Grenze, unabhängig davon welche Kopfschrift gewählt ist.
 HINT_TEXT_MAX_LENGTH = 100
+SCHOOL_NAME_MAX_LENGTH = 80
 
 # Schriftart der Buchungstabelle selbst -- bewusst NICHT konfigurierbar,
 # da eine Monospace-Schrift für die Spaltenausrichtung nötig ist.
@@ -91,7 +92,10 @@ TOP_MARGIN_PAGE1 = 100   # Platz für Logo/Kontoname/Datum -- nur auf Seite 1
 HEADER_TABLE_GAP_LINES = 2
 TOP_MARGIN_OTHER = 36
 BOTTOM_MARGIN = 36
-SIDE_MARGIN = 28
+# Rechter Seitenrand. Links bleibt mehr Platz (LEFT_MARGIN), damit die
+# Ausdrucke gelocht und abgeheftet werden können, ohne Text zu treffen.
+SIDE_MARGIN = 34
+LEFT_MARGIN = 57   # ca. 2 cm
 
 # Dunkles, gut lesbares Rot für negative Beträge -- bewusst kein grelles
 # Signalrot (255,0,0), das auf Papier/Bildschirm schnell unruhig wirkt.
@@ -153,6 +157,9 @@ DEFAULT_CONFIG = {
     "header_font": DEFAULT_HEADER_FONT,
     "header_font_path": "",
     "hint_text": DEFAULT_HINT_TEXT,
+    # Name der Schule; erscheint im Hinweis "nur für den internen Gebrauch"
+    # am Fuß jeder Seite (leer = Hinweis entfällt).
+    "school_name": "",
     # Liste von {"name": ..., "url": ...} für den Fußbereich
     # "Weiterführende Dokumente" (siehe draw_footer_links()).
     "footer_links": [],
@@ -291,6 +298,26 @@ def compute_summary(body_lines):
                 haben += amount
     gesamtsaldo = soll + haben
     return soll, haben, gesamtsaldo
+
+
+def count_bookings(body_lines):
+    """Zählt Auszahlungen (negativer Betrag, Spalte 3) und Einzahlungen
+    (Betrag >= 0) -- dieselbe Einteilung wie in compute_summary()."""
+    auszahlungen = einzahlungen = 0
+    for line in body_lines:
+        if line == "":
+            continue
+        fields = line.split(";")
+        if len(fields) > 2:
+            if to_number(fields[2]) < 0:
+                auszahlungen += 1
+            else:
+                einzahlungen += 1
+    return auszahlungen, einzahlungen
+
+
+def _count_label(n, singular, plural):
+    return f"{n} {singular if n == 1 else plural}"
 
 
 DATE_RE = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{2,4})")
@@ -631,9 +658,9 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
     # von der Buchungstabelle.
     c.setStrokeColor(colors.Color(0.6, 0.6, 0.6))
     c.setLineWidth(0.5)
-    c.line(SIDE_MARGIN, fy + FOOTER_LINE_HEIGHT - 2, width - SIDE_MARGIN, fy + FOOTER_LINE_HEIGHT - 2)
+    c.line(LEFT_MARGIN, fy + FOOTER_LINE_HEIGHT - 2, width - SIDE_MARGIN, fy + FOOTER_LINE_HEIGHT - 2)
 
-    draw_bold_text(c, SIDE_MARGIN, fy, "Weiterführende Dokumente", font_normal, font_bold, FOOTER_TITLE_SIZE)
+    draw_bold_text(c, LEFT_MARGIN, fy, "Weiterführende Dokumente", font_normal, font_bold, FOOTER_TITLE_SIZE)
     fy -= FOOTER_LINE_HEIGHT
 
     for name, url in links:
@@ -646,14 +673,14 @@ def draw_footer_links(c, width, height, y, links, font_normal, font_bold):
             fy = height - TOP_MARGIN_OTHER
         c.setFont(font_normal, FOOTER_LINK_SIZE)
         c.setFillColor(LINK_COLOR)
-        c.drawString(SIDE_MARGIN, fy, name)
+        c.drawString(LEFT_MARGIN, fy, name)
         w = c.stringWidth(name, font_normal, FOOTER_LINK_SIZE)
         # Unsichtbare Klickfläche über dem Linktext -- die URL selbst
         # wird nirgends als Text ausgegeben, nur als Klickziel hinterlegt.
-        c.linkURL(url, (SIDE_MARGIN, fy - 2, SIDE_MARGIN + w, fy + 8), relative=0)
+        c.linkURL(url, (LEFT_MARGIN, fy - 2, LEFT_MARGIN + w, fy + 8), relative=0)
         c.setStrokeColor(LINK_COLOR)
         c.setLineWidth(0.5)
-        c.line(SIDE_MARGIN, fy - 1, SIDE_MARGIN + w, fy - 1)
+        c.line(LEFT_MARGIN, fy - 1, LEFT_MARGIN + w, fy - 1)
         fy -= FOOTER_LINE_HEIGHT
 
     c.setFillColor(colors.black)
@@ -676,9 +703,11 @@ def draw_heart(c, x, y, size):
     c.drawPath(p, stroke=0, fill=1)
 
 
-def draw_credit(c, width, font):
+def draw_credit(c, width, font, school_name=""):
     """Zeichnet "Made with <Herz> and csv2pdf-gui" rechtsbündig an den
-    unteren Seitenrand; "csv2pdf-gui" ist ein Link zur Projekthomepage."""
+    unteren Seitenrand; "csv2pdf-gui" ist ein Link zur Projekthomepage.
+    Ist ein Schulname gesetzt, steht auf derselben Zeile linksbündig der
+    Hinweis, dass der Auszug nur für den internen Gebrauch bestimmt ist."""
     size = CREDIT_SIZE
     heart = size * 0.85
     gap = c.stringWidth(" ", font, size)
@@ -692,6 +721,9 @@ def draw_credit(c, width, font):
     c.saveState()
     c.setFont(font, size)
     c.setFillColor(CREDIT_COLOR)
+    if school_name:
+        notice = f"Nur für den internen Gebrauch an {school_name} bestimmt."
+        c.drawString(LEFT_MARGIN, y, notice)
     c.drawString(x, y, before)
     x += w_before + gap
     c.setFillColor(CREDIT_ACCENT_COLOR)
@@ -710,12 +742,13 @@ class CreditCanvas(canvas.Canvas):
     """Canvas, das vor jedem Seitenabschluss (auch beim letzten save())
     automatisch den Hinweis "Made with <Herz> and csv2pdf-gui" zeichnet."""
 
-    def __init__(self, *args, credit_font=DEFAULT_HEADER_FONT, **kwargs):
+    def __init__(self, *args, credit_font=DEFAULT_HEADER_FONT, school_name="", **kwargs):
         super().__init__(*args, **kwargs)
         self._credit_font = credit_font
+        self._school_name = school_name
 
     def showPage(self):
-        draw_credit(self, self._pagesize[0], self._credit_font)
+        draw_credit(self, self._pagesize[0], self._credit_font, self._school_name)
         super().showPage()
 
 
@@ -724,8 +757,11 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
              header_font_bold=STANDARD_HEADER_FONTS[DEFAULT_HEADER_FONT],
              hint_text=DEFAULT_HINT_TEXT,
              soll=0.0, haben=0.0, gesamtsaldo=0.0,
-             footer_links=None):
-    c = CreditCanvas(out_path, pagesize=A4, credit_font=header_font_normal)
+             footer_links=None, school_name="",
+             anzahl_auszahlungen=0, anzahl_einzahlungen=0):
+    school_name = (school_name or "").replace('"', " ").strip()[:SCHOOL_NAME_MAX_LENGTH]
+    c = CreditCanvas(out_path, pagesize=A4, credit_font=header_font_normal,
+                     school_name=school_name)
     width, height = A4
 
     # -- Kopfbereich nur auf Seite 1 --
@@ -733,7 +769,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
     # Original: dort war die Textposition ebenfalls fix, da die Logo-Box eine
     # feste Größe hatte). So bleibt der Kopfbereich immer gleich ausgerichtet,
     # egal welches Logo (oder gar keins) eingestellt ist.
-    text_x = SIDE_MARGIN + LOGO_MAX_WIDTH + 15
+    text_x = LEFT_MARGIN + LOGO_MAX_WIDTH + 15
     if logo_path:
         try:
             img = ImageReader(logo_path)
@@ -746,7 +782,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
             scale = min(LOGO_MAX_WIDTH / iw, LOGO_MAX_HEIGHT / ih, 1.0)
             w, h = iw * scale, ih * scale
             top_y = height - 30
-            c.drawImage(logo_path, SIDE_MARGIN, top_y - h, width=w, height=h,
+            c.drawImage(logo_path, LEFT_MARGIN, top_y - h, width=w, height=h,
                         mask="auto", preserveAspectRatio=True)
         except Exception as exc:
             print(f"Warnung: Logo konnte nicht eingebettet werden ({exc}).", file=sys.stderr)
@@ -762,17 +798,33 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
     # Gesamtsaldo/Soll/Haben -- direkt unter "Kontoauszug vom..." ohne
     # Leerzeile. Negative Beträge (typischerweise Soll, ggf. auch ein im
     # Minus stehender Gesamtsaldo) in Rot.
+    # Gesamtsaldo fett; hinter Soll/Haben steht die Anzahl der Aus- bzw.
+    # Einzahlungen.
     summary_segments = [
-        ("Gesamtsaldo: ", False),
-        (format_amount_de(gesamtsaldo), gesamtsaldo < 0),
+        ("Gesamtsaldo: ", False, True),
+        (format_amount_de(gesamtsaldo), gesamtsaldo < 0, True),
         ("    Soll: ", False),
         (format_amount_de(soll), soll < 0),
+        (f" ({_count_label(anzahl_auszahlungen, 'Auszahlung', 'Auszahlungen')})", False),
         ("    Haben: ", False),
         (format_amount_de(haben), haben < 0),
+        (f" ({_count_label(anzahl_einzahlungen, 'Einzahlung', 'Einzahlungen')})", False),
     ]
-    draw_colored_segments(c, text_x, height - 73, summary_segments, header_font_normal, 8)
+    # Zeile bei Bedarf verkleinern, damit sie nicht über den rechten Rand läuft.
+    max_w = width - SIDE_MARGIN - text_x
+    summary_size = 8
+    def _summary_width(size):
+        return sum(c.stringWidth(seg[0], header_font_bold if len(seg) > 2 and seg[2]
+                                 else header_font_normal, size) for seg in summary_segments)
+    while summary_size > 5 and _summary_width(summary_size) > max_w:
+        summary_size -= 0.5
+    draw_colored_segments(c, text_x, height - 73, summary_segments, header_font_normal,
+                          summary_size, font_bold=header_font_bold)
 
-    c.setFont(header_font_normal, 7)
+    hint_size = 7
+    while hint_size > 5 and c.stringWidth(hint_text, header_font_normal, hint_size) > max_w:
+        hint_size -= 0.5
+    c.setFont(header_font_normal, hint_size)
     c.drawString(text_x, height - 87, hint_text)
 
     # -- Buchungszeilen (immer Monospace, siehe TABLE_FONT_NAME oben) --
@@ -783,7 +835,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
             c.showPage()
             y = height - TOP_MARGIN_OTHER
         font = TABLE_FONT_NAME_BOLD if i == 0 else TABLE_FONT_NAME
-        draw_colored_segments(c, SIDE_MARGIN, y, segments, font, FONT_SIZE)
+        draw_colored_segments(c, LEFT_MARGIN, y, segments, font, FONT_SIZE)
         y -= LINE_HEIGHT
 
     if footer_links:
@@ -799,7 +851,7 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
                  header_font_normal=DEFAULT_HEADER_FONT,
                  header_font_bold=STANDARD_HEADER_FONTS[DEFAULT_HEADER_FONT],
                  hint_text=DEFAULT_HINT_TEXT,
-                 footer_links=None,
+                 footer_links=None, school_name="",
                  log=None):
     log = log or print
     text = read_csv_text(path)
@@ -813,6 +865,7 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
     ordered = group_and_sort(lines)
     formatted = format_table(ordered)
     soll, haben, gesamtsaldo = compute_summary(lines[1:])
+    anzahl_aus, anzahl_ein = count_bookings(lines[1:])
 
     stem = os.path.splitext(os.path.basename(path))[0]
     final_stem = shorten_stem(stem)
@@ -827,7 +880,8 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
     make_pdf(out_pdf, formatted, account, datum, run_time, logo_path,
               header_font_normal=header_font_normal, header_font_bold=header_font_bold,
               hint_text=hint_text, soll=soll, haben=haben, gesamtsaldo=gesamtsaldo,
-              footer_links=footer_links)
+              footer_links=footer_links, school_name=school_name,
+              anzahl_auszahlungen=anzahl_aus, anzahl_einzahlungen=anzahl_ein)
     log(f"OK: {os.path.basename(path)} -> {os.path.basename(out_pdf)}")
 
     if delete_csv:
@@ -836,7 +890,7 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
 
 def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
                 header_font_path=None, hint_text=None, footer_links=None,
-                files=None, log=None, log_err=None):
+                school_name=None, files=None, log=None, log_err=None):
     """Verarbeitet CSV-Dateien in export_dir. Wird sowohl von der
     Kommandozeile (main()) als auch von der GUI (starmoney_gui.py) genutzt,
     damit beide exakt dieselbe Logik verwenden.
@@ -871,6 +925,8 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
     effective_font_path = cfg.get("header_font_path", "") if header_font_path is None else header_font_path
     effective_hint = cfg.get("hint_text", DEFAULT_HINT_TEXT) if hint_text is None else hint_text
     effective_hint = (effective_hint or "")[:HINT_TEXT_MAX_LENGTH]
+    effective_school = cfg.get("school_name", "") if school_name is None else school_name
+    effective_school = (effective_school or "").strip()[:SCHOOL_NAME_MAX_LENGTH]
     raw_links = cfg.get("footer_links", []) if footer_links is None else footer_links
     # Nur vollständige Einträge (Name UND Link gesetzt) landen im PDF.
     effective_links = [
@@ -898,7 +954,8 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
             process_csv(path, export_dir, resolved_logo, run_time, delete_csv,
                         header_font_normal=header_font_normal,
                         header_font_bold=header_font_bold,
-                        hint_text=effective_hint, footer_links=effective_links, log=log)
+                        hint_text=effective_hint, footer_links=effective_links,
+                        school_name=effective_school, log=log)
             processed += 1
         except Exception as exc:
             errors += 1
@@ -931,8 +988,11 @@ def parse_args():
                          "(hat Vorrang vor --header-font)")
     p.add_argument("--hint-text", default=None, type=_hint_text_arg,
                     help=f"Hinweistext im Kopfbereich (max. {HINT_TEXT_MAX_LENGTH} Zeichen)")
+    p.add_argument("--school-name", default=None,
+                    help=f"Name der Schule für den Hinweis \"nur für den internen Gebrauch\" "
+                         f"am Seitenende (max. {SCHOOL_NAME_MAX_LENGTH} Zeichen)")
     p.add_argument("--save-config", action="store_true",
-                    help="Angegebene --logo/--header-font/--header-font-file/--hint-text dauerhaft "
+                    help="Angegebene --logo/--header-font/--header-font-file/--hint-text/--school-name dauerhaft "
                          "als Standard in config.json speichern")
     p.add_argument("--watch", nargs="?", const=30, default=None, type=int, metavar="SEKUNDEN",
                     help="Nicht nur einmal verarbeiten, sondern das Verzeichnis dauerhaft alle "
@@ -1003,13 +1063,15 @@ def main():
             updates["header_font_path"] = args.header_font_file
         if args.hint_text is not None:
             updates["hint_text"] = args.hint_text
+        if args.school_name is not None:
+            updates["school_name"] = args.school_name
         if updates:
             save_config(updates)
 
     run_export_kwargs = dict(
         delete_csv=args.delete_csv, logo_path=args.logo,
         header_font=args.header_font, header_font_path=args.header_font_file,
-        hint_text=args.hint_text)
+        hint_text=args.hint_text, school_name=args.school_name)
 
     if args.watch is not None:
         if not os.path.isdir(export_dir):
