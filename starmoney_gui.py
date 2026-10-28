@@ -115,6 +115,7 @@ class App(tk.Tk):
         )
         self.header_font_path = tk.StringVar(value=cfg.get("header_font_path", ""))
         self.hint_text = tk.StringVar(value=cfg.get("hint_text", backend.DEFAULT_HINT_TEXT))
+        self.school_name = tk.StringVar(value=cfg.get("school_name", ""))
         self.footer_links = list(cfg.get("footer_links", []))  # Liste von {"name":..., "url":...}
         self.watch_enabled = tk.BooleanVar(value=False)  # startet immer aus, bewusst nicht persistiert
         self.watch_interval = tk.IntVar(value=int(cfg.get("watch_interval_seconds", 30)))
@@ -303,6 +304,21 @@ class App(tk.Tk):
 
         ttk.Separator(win, orient="horizontal").pack(fill="x", padx=8, pady=(0, 8))
 
+        school_row = ttk.Frame(win)
+        school_row.pack(fill="x", **pad)
+        ttk.Label(school_row, text="Schulname:", width=16).pack(side="left")
+        school_entry = ttk.Entry(school_row, textvariable=self.school_name, width=42)
+        school_entry.pack(side="left", fill="x", expand=True, padx=(0, 6))
+        school_entry.bind("<FocusOut>", lambda *_: self._save_settings())
+        ttk.Label(
+            win,
+            text=("Erscheint am Seitenende jedes Auszugs: \"Nur für den internen Gebrauch an\n"
+                  "<Schulname> bestimmt.\" Bleibt das Feld leer, entfällt der Hinweis."),
+            foreground="#555555", justify="left",
+        ).pack(anchor="w", padx=8, pady=(0, 8))
+
+        ttk.Separator(win, orient="horizontal").pack(fill="x", padx=8, pady=(0, 8))
+
         ttk.Label(win, text="Weiterführende Dokumente (Fußbereich der PDFs):").pack(
             anchor="w", padx=8)
         ttk.Label(
@@ -344,6 +360,7 @@ class App(tk.Tk):
                 "header_font": self.header_font_choice.get(),
                 "header_font_path": self.header_font_path.get().strip(),
                 "hint_text": self.hint_text.get(),
+                "school_name": self.school_name.get().strip(),
                 "footer_links": self.footer_links,
                 "watch_interval_seconds": watch_interval,
             })
@@ -598,6 +615,7 @@ class App(tk.Tk):
         header_font_path = self.header_font_path.get().strip()
         hint_text = self.hint_text.get()
         footer_links = list(self.footer_links)
+        school_name = self.school_name.get().strip()
         delete_csv = self.delete_csv.get()
 
         self._save_settings()
@@ -614,14 +632,14 @@ class App(tk.Tk):
         thread = threading.Thread(
             target=self._worker,
             args=(export_dir, delete_csv, logo_path, header_font, header_font_path,
-                  hint_text, footer_links, files, silent),
+                  hint_text, footer_links, school_name, files, silent),
             daemon=True,
         )
         thread.start()
         return True
 
     def _worker(self, export_dir, delete_csv, logo_path, header_font, header_font_path,
-                hint_text, footer_links, files=None, silent=False):
+                hint_text, footer_links, school_name="", files=None, silent=False):
         try:
             processed, errors = backend.run_export(
                 export_dir,
@@ -631,6 +649,7 @@ class App(tk.Tk):
                 header_font_path=header_font_path,
                 hint_text=hint_text,
                 footer_links=footer_links,
+                school_name=school_name,
                 files=files,
                 log=self.log_queue.put,
                 log_err=self.log_queue.put,

@@ -1,6 +1,6 @@
 # csv2pdf-gui
 
-Version 0.2.2
+Version 0.2.3
 
 csv2pdf-gui macht aus StarMoney-CSV-Exporten übersichtliche PDF-Kontoauszüge
 mit Logo, Kontoname und Datum. Herunterladen, doppelklicken, fertig.
@@ -72,6 +72,9 @@ gespeichert:
   Mehrere Schriften stehen zur Auswahl, auf Wunsch auch eine eigene
   Schriftdatei.
 - **Hinweistext:** ein kurzer Text im Kopf des Auszugs.
+- **Schulname:** erscheint am Seitenende jedes Auszugs im Hinweis „Nur für
+  den internen Gebrauch an <Schulname> bestimmt.“ Bleibt das Feld leer,
+  entfällt der Hinweis.
 - **Weiterführende Dokumente:** beliebig viele anklickbare Links am Ende
   jedes Auszugs, etwa zur Schulordnung, zum Kontakt oder zur
   Datenschutzerklärung. Sichtbar ist nur der Name, der Link steckt dahinter.
