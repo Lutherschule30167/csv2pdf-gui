@@ -55,7 +55,7 @@ from reportlab.lib.utils import ImageReader
 
 # Zentrale Versionsnummer (wird auch von starmoney_gui.py angezeigt).
 # Bei Änderung README, /docs und Wiki angleichen.
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 # ---------------------------------------------------------------------------
 # Konfiguration
