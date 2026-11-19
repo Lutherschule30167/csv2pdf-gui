@@ -21,7 +21,6 @@ Entstanden mit Unterstützung von Claude (Anthropic).
 Lizenz: MIT
 """
 
-import glob
 import os
 import queue
 import subprocess
@@ -122,6 +121,8 @@ class App(tk.Tk):
         self._watch_after_id = None
         self._watch_known_files = set()
         self._logo_preview_image = None  # Referenz halten, sonst sammelt Tk das Bild vorzeitig ein
+        self._settings_win = None
+        self.link_rows = []
 
         self._build_widgets()
         self._refresh_csv_count()
@@ -226,7 +227,7 @@ class App(tk.Tk):
         wie überall sonst -- Änderungen dort aktualisieren live auch die
         Logo-Vorschau im Hauptfenster (über den bestehenden trace_add),
         ganz ohne doppelten Zustand."""
-        if getattr(self, "_settings_win", None) is not None and self._settings_win.winfo_exists():
+        if self._settings_open():
             self._settings_win.lift()
             self._settings_win.focus_set()
             return
@@ -235,6 +236,7 @@ class App(tk.Tk):
         win.title("Einstellungen für den Kopfbereich der PDFs")
         win.resizable(False, False)
         win.transient(self)
+        win.protocol("WM_DELETE_WINDOW", self._close_settings)
         self._settings_win = win
 
         pad = {"padx": 8, "pady": 6}
@@ -337,7 +339,19 @@ class App(tk.Tk):
         ttk.Button(win, text="+ Dokument hinzufügen", command=lambda: self._add_link_row()).pack(
             anchor="w", padx=8, pady=(4, 8))
 
-        ttk.Button(win, text="Schließen", command=win.destroy).pack(pady=(0, 10))
+        ttk.Button(win, text="Schließen", command=self._close_settings).pack(pady=(0, 10))
+
+    def _settings_open(self):
+        return self._settings_win is not None and self._settings_win.winfo_exists()
+
+    def _close_settings(self):
+        """Schließen per Button oder Fenster-X. Speichert vorher alles --
+        ohne das ginge ein gerade getippter Link verloren, weil Tk beim
+        Schließen nicht zuverlässig <FocusOut> auslöst."""
+        if self._settings_open():
+            self._save_settings()
+            self._settings_win.destroy()
+        self._settings_win = None
 
     # ------------------------------------------------------------------
     def _save_settings(self):
@@ -352,6 +366,10 @@ class App(tk.Tk):
             watch_interval = int(self.watch_interval.get())
         except (ValueError, tk.TclError):
             watch_interval = 30
+        # Ist der Einstellungsdialog offen, die Link-Zeilen dort übernehmen
+        # (auch wenn das zuletzt bearbeitete Feld noch den Fokus hat).
+        if self._settings_open():
+            self._collect_footer_links()
         try:
             backend.save_config({
                 "export_dir": self.export_dir.get().strip(),
@@ -423,7 +441,7 @@ class App(tk.Tk):
         row_frame.destroy()
         self._save_footer_links()
 
-    def _save_footer_links(self):
+    def _collect_footer_links(self):
         links = []
         for name_var, url_var, _ in self.link_rows:
             name = name_var.get().strip()
@@ -431,6 +449,9 @@ class App(tk.Tk):
             if name or url:
                 links.append({"name": name, "url": url})
         self.footer_links = links
+
+    def _save_footer_links(self):
+        self._collect_footer_links()
         self._save_settings()
 
     def _validate_hint_text(self, proposed):
@@ -488,7 +509,8 @@ class App(tk.Tk):
         d = self.export_dir.get()
         if os.path.isdir(d):
             try:
-                n = len([f for f in os.listdir(d) if f.lower().endswith(".csv")])
+                os.listdir(d)  # wirft, wenn der Ordner nicht lesbar ist
+                n = len(backend.list_csv_files(d))
                 self.count_label.config(text=f"{n} CSV-Datei(en) in diesem Ordner gefunden.")
             except Exception:
                 self.count_label.config(text="Ordner kann nicht gelesen werden.")
@@ -533,7 +555,7 @@ class App(tk.Tk):
             # Klick), danach gelten alle jetzt vorhandenen CSVs als
             # "bekannt" -- nur wirklich neu hinzukommende werden von der
             # Überwachung selbst noch verarbeitet.
-            self._watch_known_files = set(glob.glob(os.path.join(d, "*.csv")))
+            self._watch_known_files = set(backend.list_csv_files(d))
             self._launch_run(d, files=None, clear_log=True, silent=True)
             self.watch_status_label.config(text="Überwachung aktiv")
             self._schedule_watch_tick(interval)
@@ -559,7 +581,7 @@ class App(tk.Tk):
             interval = 30
 
         if os.path.isdir(d) and not self.worker_running:
-            current = set(glob.glob(os.path.join(d, "*.csv")))
+            current = set(backend.list_csv_files(d))
             new_files = current - self._watch_known_files
             if new_files:
                 self._append_log(f"Überwachung: {len(new_files)} neue CSV-Datei(en) gefunden.")
@@ -610,6 +632,10 @@ class App(tk.Tk):
         if self.worker_running:
             return False
 
+        # Zuerst speichern: übernimmt dabei auch Links aus einem offenen
+        # Einstellungsdialog, damit der Lauf den aktuellen Stand nutzt.
+        self._save_settings()
+
         logo_path = self.logo_path.get().strip()
         header_font = self.header_font_choice.get()
         header_font_path = self.header_font_path.get().strip()
@@ -617,8 +643,6 @@ class App(tk.Tk):
         footer_links = list(self.footer_links)
         school_name = self.school_name.get().strip()
         delete_csv = self.delete_csv.get()
-
-        self._save_settings()
 
         if clear_log:
             self.log_widget.config(state="normal")

@@ -1,6 +1,6 @@
 # csv2pdf-gui
 
-Version 0.2.4
+Version 0.2.5
 
 csv2pdf-gui macht aus StarMoney-CSV-Exporten übersichtliche PDF-Kontoauszüge
 mit Logo, Kontoname und Datum. Herunterladen, doppelklicken, fertig.
@@ -170,6 +170,10 @@ als Artefakt am Lauf) oder lokal unter Windows per Doppelklick auf
 `build_exe.bat` (Ergebnis in `dist\`). Die Version wird nur in
 `starmoney_export.py` (`__version__`) gepflegt.
 
+Tests (mit anonymisierten Daten) liegen in `tests/` und laufen bei jedem
+Push sowie vor jedem EXE-Bau automatisch; lokal mit
+`pip install pytest` und `python -m pytest`.
+
 ### Technischer Hintergrund
 
 csv2pdf-gui ist eine Python-Neuimplementierung des Original-Bash-Skripts
@@ -197,7 +201,10 @@ Anders gelöst, im Ergebnis gleich:
   Courier 7 pt, A4 hoch.
 
 Nicht vollständig geprüft: Die Spaltenausrichtung bildet
-`column -t ... -T 5 -E 2 -R 3,4 -l 12` nach (Spalten 2/3/4 fest 30/10/10
-Zeichen, übrige dynamisch, Gesamtbreite höchstens 120 Zeichen, Spalte 5
-wird bei Bedarf gekürzt). Am besten einmal mit einem echten, anonymisierten
+`column -t ... -T 5 -E 2 -R 3,4 -l 12` nach (Begünstigter fest 30 Zeichen,
+Betrag und Saldo mindestens 10 Zeichen und nie gekürzt, übrige dynamisch,
+Gesamtbreite höchstens 120 Zeichen, Spalte 5 wird bei Bedarf gekürzt).
+Die CSV wird mit dem `csv`-Modul gelesen, Semikolons und Zeilenumbrüche
+in Anführungszeichen bleiben also Teil des Feldes; Summen werden exakt
+(`Decimal`) berechnet. Am besten einmal mit einem echten, anonymisierten
 Export gegenprüfen.
