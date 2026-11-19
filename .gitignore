@@ -5,3 +5,6 @@ dist/
 config.json
 export_auszuege/
 version_info.txt
+config.json.tmp
+config.json.defekt
+.pytest_cache/

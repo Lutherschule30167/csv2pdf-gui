@@ -35,13 +35,16 @@ Lizenz: MIT
 """
 
 import argparse
-import glob
+import csv
+import io
 import json
 import os
 import re
+import shutil
 import sys
 import time
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -134,17 +137,22 @@ LOGO_MAX_WIDTH = 78.0
 LOGO_MAX_HEIGHT = 60.0
 
 MAX_LINE_WIDTH = 120                  # entspricht "column -c 120"
-FIXED_WIDTHS = {2: 30, 3: 10, 4: 10}   # 1-indiziert wie im Original (Spalte 2/3/4)
+# Spaltennummern 1-indiziert wie im Original. Begünstigter (Spalte 2) hat
+# eine feste Breite und wird bei Bedarf gekürzt.
+FIXED_WIDTHS = {2: 30}
+# Betrag und Saldo (Spalte 3/4) sind mindestens so breit, wachsen aber mit
+# dem längsten Wert mit -- Beträge werden NIE abgeschnitten (sonst würde
+# aus "-123.456,78" stillschweigend "-123.456,7").
+MIN_WIDTHS = {3: 10, 4: 10}
 RIGHT_ALIGN_COLUMNS = {3, 4}           # entspricht "-R 3,4"
 TRUNCATE_COLUMNS = {5}                 # entspricht "-T 5"
 SEPARATOR = "||"                       # entspricht "column -o '||'"
-# Nach diesen Spalten (Buchungstag/Begünstigter/Betrag/Saldo) wird die
-# linke Hälfte des "||"-Trenners durch ein Leerzeichen ersetzt (" |"
-# statt "||") -- rein optisch, ändert nichts an der Spaltenbreite/
-# Ausrichtung. Trenner nach weiteren, hier nicht genannten Spalten
-# (z.B. nach Verwendungszweck, falls noch mehr Spalten folgen) bleiben "||".
+# Nach diesen Spalten (Buchungstag/Begünstigter/Betrag/Saldo) steht statt
+# "||" ein " | " -- rein optisch, mit Luft auf beiden Seiten. Trenner nach
+# weiteren Spalten (z.B. nach Verwendungszweck, falls noch mehr Spalten
+# folgen) bleiben "||".
 LEFT_SPACE_AFTER_COLUMNS = {1, 2, 3, 4}
-LEFT_SPACE_SEPARATOR = " " + SEPARATOR[1:]
+LEFT_SPACE_SEPARATOR = " | "
 
 SHORTEN_RE = re.compile(r'^([^.]+)_([^.]+)_([^.]+)_([^.]+)_([^.]+)$')
 
@@ -196,19 +204,62 @@ def config_path():
     return os.path.join(app_dir(), "config.json")
 
 
-def load_config():
-    """Liest config.json (siehe config_path()). Fehlt die Datei oder ist sie
-    beschädigt, werden einfach die Standardwerte zurückgegeben."""
-    cfg = dict(DEFAULT_CONFIG)
+def _valid_config_value(key, value):
+    """Prüft, ob ein Wert aus config.json zum Typ des Standardwerts passt
+    (z.B. nach Bearbeitung von Hand). Unpassende Werte werden ignoriert,
+    statt später GUI oder Export abstürzen zu lassen."""
+    default = DEFAULT_CONFIG[key]
+    if isinstance(default, bool):
+        return isinstance(value, bool)
+    if isinstance(default, int):
+        return isinstance(value, int) and not isinstance(value, bool) and value >= 1
+    if isinstance(default, str):
+        return isinstance(value, str)
+    if isinstance(default, list):
+        return isinstance(value, list) and all(
+            isinstance(e, dict)
+            and isinstance(e.get("name", ""), str)
+            and isinstance(e.get("url", ""), str)
+            for e in value)
+    return True
+
+
+def _backup_broken_config(path, reason):
+    """Sichert eine nicht lesbare config.json als config.json.defekt, bevor
+    sie beim nächsten Speichern mit Standardwerten überschrieben wird -- so
+    gehen die Einstellungen nach einem Tippfehler nicht unwiederbringlich
+    verloren."""
+    backup = path + ".defekt"
     try:
-        with open(config_path(), "r", encoding="utf-8") as fh:
+        shutil.copy2(path, backup)
+    except OSError:
+        return
+    print(f"Warnung: {path} ist beschädigt ({reason}). Sicherung: {backup}. "
+          f"Es gelten die Standardwerte.", file=sys.stderr)
+
+
+def load_config():
+    """Liest config.json (siehe config_path()). Fehlt die Datei, werden die
+    Standardwerte zurückgegeben. Ist sie beschädigt, wird sie vorher als
+    config.json.defekt gesichert; einzelne Werte mit falschem Typ werden
+    ignoriert."""
+    cfg = dict(DEFAULT_CONFIG)
+    path = config_path()
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-        if isinstance(data, dict):
-            cfg.update({k: v for k, v in data.items() if k in DEFAULT_CONFIG})
     except FileNotFoundError:
-        pass
-    except Exception:
-        pass
+        return cfg
+    except ValueError as exc:  # JSON-Syntaxfehler oder kein UTF-8
+        _backup_broken_config(path, exc)
+        return cfg
+    except OSError:
+        return cfg
+    if not isinstance(data, dict):
+        _backup_broken_config(path, "kein JSON-Objekt")
+        return cfg
+    cfg.update({k: v for k, v in data.items()
+                if k in DEFAULT_CONFIG and _valid_config_value(k, v)})
     return cfg
 
 
@@ -229,8 +280,12 @@ def save_config(updates):
 
 
 def _write_config(path, cfg):
-    with open(path, "w", encoding="utf-8") as fh:
+    # Erst in eine temporäre Datei schreiben, dann ersetzen: bricht das
+    # Schreiben ab, bleibt die alte config.json unversehrt.
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(cfg, fh, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
 
 
 # ---------------------------------------------------------------------------
@@ -250,27 +305,65 @@ def read_csv_text(path):
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
+def _clean_field(value):
+    # Zeilenumbrüche/Tabs in Feldern (z.B. mehrzeiliger Verwendungszweck)
+    # und Mehrfach-Leerzeichen zu einem Leerzeichen zusammenfassen.
+    return " ".join(value.split())
+
+
+def read_csv_rows(path):
+    """Liest eine StarMoney-CSV als Liste von Zeilen (je eine Liste von
+    Feldern). Über das csv-Modul, damit Semikolons und Zeilenumbrüche
+    INNERHALB von Anführungszeichen (z.B. im Verwendungszweck) nicht als
+    Spalten- bzw. Zeilentrenner gelten. Leerzeilen werden zu [], Leerzeilen
+    am Dateiende entfallen."""
+    reader = csv.reader(io.StringIO(read_csv_text(path)), delimiter=";")
+    rows = [[_clean_field(f) for f in row] for row in reader]
+    rows = [row if any(row) else [] for row in rows]
+    while rows and not rows[-1]:
+        rows.pop()
+    return rows
+
+
+def list_csv_files(directory):
+    """Alle .csv-Dateien in directory (Groß-/Kleinschreibung der Endung
+    egal), sortiert. Bewusst ohne glob: dort würden eckige Klammern im
+    Ordnernamen (z.B. "Auszüge [2026]") als Suchmuster gelesen und nichts
+    gefunden."""
+    try:
+        names = os.listdir(directory)
+    except OSError:
+        return []
+    paths = (os.path.join(directory, n) for n in names if n.lower().endswith(".csv"))
+    return sorted(p for p in paths if os.path.isfile(p))
+
+
 # ---------------------------------------------------------------------------
 # Tagesgruppierung + Sortierung (Portierung des ersten AWK-Blocks)
 # ---------------------------------------------------------------------------
 def to_number(value):
-    v = value.replace('"', "").replace(".", "").replace(",", ".")
+    """Deutschen Betrag ("-1.234,50") als Decimal lesen. Decimal statt
+    float, damit Summen exakt bleiben (mit float ergibt z.B.
+    -0,10 - 0,20 + 0,30 einen winzigen Rest und damit "-0,00").
+    Nicht lesbare Werte zählen als 0."""
+    v = value.replace('"', "").replace(".", "").replace(",", ".").strip()
     try:
-        return float(v)
-    except ValueError:
-        return 0.0
+        d = Decimal(v)
+    except InvalidOperation:
+        return Decimal(0)
+    return d if d.is_finite() else Decimal(0)
 
 
 def format_amount_de(value):
     """Formatiert eine Zahl im deutschen Format (Tausenderpunkt,
-    Dezimalkomma), z.B. -1234.5 -> "-1.234,50"."""
-    sign = "-" if value < 0 else ""
+    Dezimalkomma), z.B. -1234.5 -> "-1.234,50". Nie "-0,00"."""
     s = f"{abs(value):,.2f}"          # zunächst "1,234.50" (en-US-Zwischenschritt)
+    sign = "-" if value < 0 and s.strip("0.,") else ""
     s = s.replace(",", "\0").replace(".", ",").replace("\0", ".")
     return sign + s
 
 
-def compute_summary(body_lines):
+def compute_summary(body_rows):
     """Berechnet aus den Datenzeilen:
     - soll: Summe aller negativen Beträge (Spalte 3)
     - haben: Summe aller positiven Beträge (Spalte 3)
@@ -284,12 +377,9 @@ def compute_summary(body_lines):
     unzusammenhängenden Wert (z.B. Soll -624,00 / Haben 624,00, aber
     Gesamtsaldo fälschlich -8,00 aus einer beliebigen Saldo-Zelle statt
     korrekt 0,00)."""
-    soll = 0.0
-    haben = 0.0
-    for line in body_lines:
-        if line == "":
-            continue
-        fields = line.split(";")
+    soll = Decimal(0)
+    haben = Decimal(0)
+    for fields in body_rows:
         if len(fields) > 2:
             amount = to_number(fields[2])
             if amount < 0:
@@ -300,14 +390,11 @@ def compute_summary(body_lines):
     return soll, haben, gesamtsaldo
 
 
-def count_bookings(body_lines):
+def count_bookings(body_rows):
     """Zählt Auszahlungen (negativer Betrag, Spalte 3) und Einzahlungen
     (Betrag >= 0) -- dieselbe Einteilung wie in compute_summary()."""
     auszahlungen = einzahlungen = 0
-    for line in body_lines:
-        if line == "":
-            continue
-        fields = line.split(";")
+    for fields in body_rows:
         if len(fields) > 2:
             if to_number(fields[2]) < 0:
                 auszahlungen += 1
@@ -335,16 +422,16 @@ def normalize_date_field(field):
     return DATE_RE.sub(repl, field, count=1)
 
 
-def group_and_sort(lines):
-    """Gruppiert Zeilen nach Datum (Spalte 1) und sortiert innerhalb jeder
+def group_and_sort(rows):
+    """Gruppiert Zeilen (Listen von Feldern, siehe read_csv_rows) nach Datum (Spalte 1) und sortiert innerhalb jeder
     Gruppe: Gutschriften (positiv) aufsteigend zuerst, danach Abbuchungen
     (negativ) absteigend -- auf Basis des rohen Betrags (Spalte 3). Die
     Tagesgruppen selbst werden in umgekehrter Reihenfolge ausgegeben
     (neuestes Datum zuerst oben). Leerzeilen bleiben als eigene Gruppen
     an ihrer relativen Position erhalten."""
-    if not lines:
+    if not rows:
         return []
-    header, body = lines[0], lines[1:]
+    header, body = rows[0], rows[1:]
 
     groups = []
     pos_buf, neg_buf = [], []
@@ -359,28 +446,21 @@ def group_and_sort(lines):
         groups.append([ln for ln, _ in pos_sorted] + [ln for ln, _ in neg_sorted])
         pos_buf, neg_buf = [], []
 
-    for line in body:
-        if line == "":
+    for fields in body:
+        if not fields:
             close_group()
-            groups.append([line])
+            groups.append([fields])
             continue
-        # Anführungszeichen in Datenzeilen durch ein Leerzeichen ersetzen
-        # (nur hier, nicht in der Kopfzeile -- die wird in format_table()
-        # separat behandelt und ihre Anführungszeichen komplett entfernt,
-        # nicht durch ein Leerzeichen ersetzt).
-        line = line.replace('"', " ")
-        fields = line.split(";")
-        if fields:
-            # Datum vor der Gruppierung normalisieren (führende Null),
-            # damit "1.3.2024" und "01.03.2024" auch als derselbe Tag
-            # erkannt werden und die Anzeige einheitlich ist.
-            fields[0] = normalize_date_field(fields[0])
-            line = ";".join(fields)
-        date = fields[0] if fields else ""
+        fields = list(fields)
+        # Datum vor der Gruppierung normalisieren (führende Null), damit
+        # "1.3.2024" und "01.03.2024" auch als derselbe Tag erkannt werden
+        # und die Anzeige einheitlich ist.
+        fields[0] = normalize_date_field(fields[0])
+        date = fields[0]
         if date != prev_date and (pos_buf or neg_buf):
             close_group()
-        amount = to_number(fields[2]) if len(fields) > 2 else 0.0
-        (neg_buf if amount < 0 else pos_buf).append((line, amount))
+        amount = to_number(fields[2]) if len(fields) > 2 else Decimal(0)
+        (neg_buf if amount < 0 else pos_buf).append((fields, amount))
         prev_date = date
 
     close_group()
@@ -394,33 +474,27 @@ def group_and_sort(lines):
 # ---------------------------------------------------------------------------
 # Spaltenformatierung (Portierung von sprintf-Padding + "column -t")
 # ---------------------------------------------------------------------------
-def apply_fixed_widths(fields):
-    out = list(fields)
-    for idx, width in FIXED_WIDTHS.items():
-        i = idx - 1
-        if i < len(out):
-            val = out[i][:width]
-            out[i] = val.rjust(width) if idx in RIGHT_ALIGN_COLUMNS else val.ljust(width)
-    return out
+def _separator_after(col_idx):
+    """Trenner hinter der (1-indizierten) Spalte col_idx."""
+    return LEFT_SPACE_SEPARATOR if col_idx in LEFT_SPACE_AFTER_COLUMNS else SEPARATOR
 
 
-def format_table(lines):
+def format_table(rows):
     """Gibt pro Zeile eine Liste von (Text, ist_negativ)-Segmenten zurück
     (Zellen und Trenner abwechselnd), statt eines fertigen Strings -- so
     kann make_pdf() negative Beträge/Salden gezielt rot einfärben, ohne
     die Monospace-Ausrichtung zu verlieren (Trenner sind immer schwarz)."""
-    if not lines:
+    if not rows:
         return []
-    header_fields = [f.replace('"', "") for f in lines[0].split(";")]
-    data_lines = lines[1:]
-    data_field_rows = [ln.split(";") for ln in data_lines if ln != ""]
+    header_fields = rows[0]
+    data_rows = rows[1:]
+    data_field_rows = [r for r in data_rows if r]
 
     all_field_rows = [header_fields] + data_field_rows
     ncols = max((len(r) for r in all_field_rows), default=0)
 
     def pad_row(fields):
-        fields = fields + [""] * (ncols - len(fields))
-        return apply_fixed_widths(fields)
+        return list(fields) + [""] * (ncols - len(fields))
 
     padded_header = pad_row(header_fields)
     padded_rows = [pad_row(r) for r in data_field_rows]
@@ -444,9 +518,10 @@ def format_table(lines):
         if col_idx in FIXED_WIDTHS:
             widths.append(FIXED_WIDTHS[col_idx])
         else:
-            widths.append(max((len(r[c]) for r in all_padded), default=0))
+            longest = max((len(r[c]) for r in all_padded), default=0)
+            widths.append(max(longest, MIN_WIDTHS.get(col_idx, 0)))
 
-    total = sum(widths) + len(SEPARATOR) * max(ncols - 1, 0)
+    total = sum(widths) + sum(len(_separator_after(i)) for i in range(1, ncols))
     if total > MAX_LINE_WIDTH:
         overflow = total - MAX_LINE_WIDTH
         for col_idx in TRUNCATE_COLUMNS:
@@ -462,16 +537,15 @@ def format_table(lines):
             val = fields[c][: widths[c]]
             cell = val.rjust(widths[c]) if col_idx in RIGHT_ALIGN_COLUMNS else val.ljust(widths[c])
             if c > 0:
-                after_col = c  # 1-indizierte Spalte, die vor diesem Trenner steht
-                sep = LEFT_SPACE_SEPARATOR if after_col in LEFT_SPACE_AFTER_COLUMNS else SEPARATOR
-                segments.append((sep, False))
+                # c = 1-indizierte Spalte, die vor diesem Trenner steht
+                segments.append((_separator_after(c), False))
             segments.append((cell, col_idx in neg_cols))
         return segments
 
     out_lines = [render(padded_header, set())]
     idx = 0
-    for ln in data_lines:
-        if ln == "":
+    for row in data_rows:
+        if not row:
             out_lines.append([("", False)])
         else:
             out_lines.append(render(padded_rows[idx], neg_flags_per_row[idx]))
@@ -756,7 +830,7 @@ def make_pdf(out_path, formatted_lines, account, datum, run_time, logo_path,
              header_font_normal=DEFAULT_HEADER_FONT,
              header_font_bold=STANDARD_HEADER_FONTS[DEFAULT_HEADER_FONT],
              hint_text=DEFAULT_HINT_TEXT,
-             soll=0.0, haben=0.0, gesamtsaldo=0.0,
+             soll=0, haben=0, gesamtsaldo=0,
              footer_links=None, school_name="",
              anzahl_auszahlungen=0, anzahl_einzahlungen=0):
     school_name = (school_name or "").replace('"', " ").strip()[:SCHOOL_NAME_MAX_LENGTH]
@@ -854,18 +928,15 @@ def process_csv(path, export_dir, logo_path, run_time, delete_csv,
                  footer_links=None, school_name="",
                  log=None):
     log = log or print
-    text = read_csv_text(path)
-    lines = text.split("\n")
-    while lines and lines[-1] == "":
-        lines.pop()
-    if not lines:
+    rows = read_csv_rows(path)
+    if not rows:
         log(f"Leere Datei übersprungen: {os.path.basename(path)}")
         return
 
-    ordered = group_and_sort(lines)
+    ordered = group_and_sort(rows)
     formatted = format_table(ordered)
-    soll, haben, gesamtsaldo = compute_summary(lines[1:])
-    anzahl_aus, anzahl_ein = count_bookings(lines[1:])
+    soll, haben, gesamtsaldo = compute_summary(rows[1:])
+    anzahl_aus, anzahl_ein = count_bookings(rows[1:])
 
     stem = os.path.splitext(os.path.basename(path))[0]
     final_stem = shorten_stem(stem)
@@ -936,7 +1007,7 @@ def run_export(export_dir, delete_csv=False, logo_path=None, header_font=None,
     ]
 
     if files is None:
-        csv_files = sorted(glob.glob(os.path.join(export_dir, "*.csv")))
+        csv_files = list_csv_files(export_dir)
     else:
         csv_files = sorted(files)
     if not csv_files:
@@ -1025,7 +1096,7 @@ def watch_loop(export_dir, interval_seconds, run_export_kwargs, log=None, log_er
     log_err = log_err or (lambda m: print(m, file=sys.stderr))
     sleep_func = sleep_func or time.sleep
 
-    known = set(glob.glob(os.path.join(export_dir, "*.csv")))
+    known = set(list_csv_files(export_dir))
     log(f"Überwachung gestartet: {export_dir} (Prüfung alle {interval_seconds}s, "
         f"Strg+C zum Beenden). {len(known)} vorhandene CSV-Datei(en) werden jetzt verarbeitet.")
     if known:
@@ -1037,7 +1108,7 @@ def watch_loop(export_dir, interval_seconds, run_export_kwargs, log=None, log_er
         sleep_func(interval_seconds)
         if stop_check and stop_check():
             return
-        current = set(glob.glob(os.path.join(export_dir, "*.csv")))
+        current = set(list_csv_files(export_dir))
         new_files = current - known
         if new_files:
             log(f"{len(new_files)} neue CSV-Datei(en) gefunden.")
