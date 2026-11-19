@@ -1,6 +1,6 @@
 # csv2pdf-gui
 
-Version 0.2.4
+Version 0.2.5
 
 csv2pdf-gui macht aus StarMoney-CSV-Exporten übersichtliche PDF-Kontoauszüge
 mit Logo, Kontoname und Datum. Herunterladen, doppelklicken, fertig.
