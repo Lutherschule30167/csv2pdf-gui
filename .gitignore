@@ -8,3 +8,4 @@ version_info.txt
 config.json.tmp
 config.json.defekt
 .pytest_cache/
+handover.md
